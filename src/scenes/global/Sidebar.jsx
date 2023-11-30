@@ -3,7 +3,7 @@ import logo from '../../zadroit logo.png'
 import { ProSidebar, Menu, MenuItem } from "react-pro-sidebar";
 import { Box, IconButton, Typography, useTheme } from "@mui/material";
 import { Link } from "react-router-dom";
-import "react-pro-sidebar/dist/css/styles.css";
+//import "react-pro-sidebar/dist/css/styles.css";
 import { tokens } from "../../themes"
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
