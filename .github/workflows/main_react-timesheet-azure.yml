@@ -52,5 +52,5 @@ jobs:
         with:
           app-name: 'react-timesheet-azure'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_B8195E3DC8854FE4ABBF80A1F54B07F6 }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_B68B70B0C2204DA3BFF7CA9260FCB4DC }}
           package: .
