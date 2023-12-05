@@ -21,12 +21,15 @@ jobs:
         with:
           node-version: '18.x'
 
+      
+
       - name: npm install, build, and test
-        run: |
+        run: 
           npm install
           npm install react-pro-sidebar@0.7.1
           npm run build --if-present
           npm run test --if-present
+
       - name: Set CI environment variable
         run: 
          echo "CI=false" >> $GITHUB_ENV
