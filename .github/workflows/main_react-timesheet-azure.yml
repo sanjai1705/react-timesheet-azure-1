@@ -52,7 +52,19 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: node-app
-      
+
+      - name: Check disk space
+        run: df -h
+
+      - name: Clean up temp folders
+        run: |
+          rm -rf /tmp/*
+          rm -rf /var/tmp/*
+
+      - name: Remove unnecessary files
+        run: |
+          find . -type f -exec du -h {} + | sort -rh | awk '$1 > 100M {print $2}' | xargs rm -f
+
       - name: 'Deploy to Azure Web App'
         uses: azure/webapps-deploy@v2
         id: deploy-to-webapp
