@@ -16,27 +16,32 @@ jobs:
       - name: Set up Node.js version
         uses: actions/setup-node@v3
         with:
-          node-version: '14'  # Use the desired Node.js version
+          node-version: '14.x'
 
       - name: Check if node_modules exists
+        id: check-node-modules
         run: |
           if [ -d "node_modules" ]; then
-            echo "node_modules directory found, skipping npm install"
+            echo "::set-output name=exists::true"
           else
-            echo "node_modules directory not found, running npm install"
-            npm install
+            echo "::set-output name=exists::false"
           fi
 
-      - name: npm build
-        run: npm run build --if-present
-        continue-on-error: true  # Continue to the next step even if the build fails
+      - name: Install or update dependencies
+        if: steps.check-node-modules.outputs.exists == 'false'
+        run: npm install
+          
+      - name: Install or update react-pro-sidebar
+        run: npm install react-pro-sidebar@0.7.1
 
-      - name: npm test
-        run: npm run test --if-present || true  # Continue even if tests fail
+      - name: Build and test
+        run: |
+          npm run build --if-present
+          npm run test --if-present
 
       - name: Set CI environment variable
         run: echo "CI=false" >> $GITHUB_ENV
-      
+
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v3
         with:
@@ -56,7 +61,7 @@ jobs:
         with:
           name: node-app
       
-      - name: 'Deploy to Azure Web App'
+      - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v2
         id: deploy-to-webapp
         with:
