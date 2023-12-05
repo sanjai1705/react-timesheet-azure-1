@@ -21,11 +21,11 @@ jobs:
       - name: Check if node_modules exists
         id: check-node-modules
         run: |
-          if [ -d "node_modules" ]; then
-            echo "::set-output name=exists::true"
-          else
-            echo "::set-output name=exists::false"
-          fi
+          if exist "node_modules" (
+            echo ::set-output name=exists::true
+          ) else (
+            echo ::set-output name=exists::false
+          )
 
       - name: Install or update dependencies
         if: steps.check-node-modules.outputs.exists == 'false'
