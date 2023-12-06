@@ -40,7 +40,7 @@ function LoginForm() {
     event.preventDefault();
 
     try {
-      const response = await axios.post('https://springboot-timesheet-azure.azurewebsites.net/Timesheet/login', {
+      const response = await axios.post('http://localhost:8080/Timesheet/login', {
         username,
         password,
       });
