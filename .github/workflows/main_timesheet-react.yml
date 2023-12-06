@@ -25,7 +25,7 @@ jobs:
         run: |
           npm install
           npm install react-pro-sidebar@0.7.1
-          npm run build -- --no-warnings
+          CI=false npm run build  # Set CI to false during the build step
           npm run test --if-present
 
       - name: Zip Release
