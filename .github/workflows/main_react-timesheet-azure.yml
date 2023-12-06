@@ -40,36 +40,40 @@ jobs:
           name: node-app
           path: .
 
+ jobs:
   deploy:
     runs-on: ubuntu-latest
-    needs: build
-    environment:
-      name: 'Production'
-      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
-    
-    steps:
-      - name: Download artifact from build job
-        uses: actions/download-artifact@v3
-        with:
-          name: node-app
 
-      - name: Check disk space
-        run: df -h
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
 
       - name: Clean up temp folders
         run: |
-          rm -rf /tmp/*
-          rm -rf /var/tmp/*
+          sudo rm -rf /tmp/*
+          sudo rm -rf /var/tmp/*
 
       - name: Remove unnecessary files
         run: |
-          find . -type f -exec du -h {} + | sort -rh | awk '$1 > 100M {print $2}' | xargs rm -f
+          find . -type f -exec du -h {} + | sort -rh | awk '$1 > 100M {print $2}' | xargs sudo rm -f
 
-      - name: 'Deploy to Azure Web App'
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v7
+        with:
+          dotnet-version: '6.x'
+
+      - name: Build and publish
+        run: |
+          dotnet publish -c Release -o out
+
+      - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v2
-        id: deploy-to-webapp
         with:
           app-name: 'react-timesheet-azure'
           slot-name: 'Production'
-          package: .
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_2EAC966D430940409EE8669733E8C0DF }}
+          package: ./out
