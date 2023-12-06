@@ -63,4 +63,4 @@ jobs:
           app-name: 'timesheet-react'
           slot-name: 'Production'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_51519D1C1ED94DE5BC49E2A045E6C93B }}
-          package: .
+          package: release.zip
