@@ -61,7 +61,6 @@ const Approval = () => {
     }
   };
 
-  
   const handleWeekPickerChange = async (newValue) => {
     setValue(newValue)
     const currentDate = new Date(newValue);
@@ -110,10 +109,10 @@ const Approval = () => {
   const handleClose = () => {
     setAnchorEl(null);
   };
-  
+
 
   const getDATA=async(startDate, endDate)=>{
-    console.log(`Start date of the week: ${startDate}`);
+    console.log(`Start date of the week: ${startDate}`);    
     console.log(`End date of the week: ${endDate}`);
     try {
       const fetchData = fetchManEmpInfo?.map(async (item) => {

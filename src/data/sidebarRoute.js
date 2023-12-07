@@ -1,16 +1,17 @@
 const sideBarRoute = {
     Employee: {
-        dashboard: '/employee/',
-        timeentries: '/employee/timeentries',
-        viewtimesheet: '/employee/viewtimesheet',
-        calendar: '/employee/calendar'
+        dashboard: '/e/',
+        timeentries: '/e/timeentries',
+        viewtimesheet: '/e/viewtimesheet',
+        calendar: '/e/calendar'
     },
     Manager: {
-        dashboard: '/manager/',
-        timeentries: '/manager/timeentries',
-        viewtimesheet: '/manager/viewtimesheet',
-        approvals: '/manager/approvals',
-        calendar: '/manager/calendar'
+        dashboard: '/m/',
+        timeentries: '/m/timeentries',
+        viewtimesheet: '/m/viewtimesheet',
+        approvals: '/m/approvals',
+        calendar: '/m/calendar',
+        timesheetreports: '/m/timesheetreports'
     },
     Admin: {
         dashboard: '/admin/',

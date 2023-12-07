@@ -3,13 +3,13 @@ import logo from '../../zadroit logo.png'
 import { ProSidebar, Menu, MenuItem } from "react-pro-sidebar";
 import { Box, IconButton, Typography, useTheme } from "@mui/material";
 import { Link } from "react-router-dom";
-//import "react-pro-sidebar/dist/css/styles.css";
+import "react-pro-sidebar/dist/css/styles.css";
 import { tokens } from "../../themes"
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import CalendarTodayOutlinedIcon from "@mui/icons-material/CalendarTodayOutlined";
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
-import { ApprovalOutlined, ManageAccounts, ViewAgendaOutlined } from "@mui/icons-material";
+import { ApprovalOutlined, ArticleOutlined, ManageAccounts, ViewAgendaOutlined } from "@mui/icons-material";
 import { AuthContext } from "../../App";
 import { getRoutesByRole } from "../../utils/sidebarRouteUtil";
 
@@ -87,7 +87,6 @@ const Sidebar = () => {
               </Box>
             )}
           </MenuItem>
-            {console.log(userRoutes)}
           <Box paddingLeft={isCollapsed ? undefined : "10%"}>
             <Item
               title="Dashboard"
@@ -119,9 +118,9 @@ const Sidebar = () => {
             />
             {user.role=='Manager' &&
              <Item
-              title="Manage Team"
-              to="/manageteam"
-              icon={<ManageAccounts/>}
+              title="Timesheet Reports"
+              to={userRoutes.timesheetreports}
+              icon={<ArticleOutlined/>}
               selected={selected}
               setSelected={setSelected}
             />}

@@ -1,4 +1,4 @@
-import { Card, CardContent, Paper, Table, TableBody, TableCell, TableContainer, TableRow, Typography } from '@mui/material'
+import { Paper, Table, TableBody, TableCell, TableContainer, TableRow, Typography } from '@mui/material'
 import React, { useContext, useEffect, useState } from 'react'
 import { mockDataTeam } from '../../data/mockData';
 import axios from 'axios';

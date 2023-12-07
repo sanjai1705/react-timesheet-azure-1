@@ -3,9 +3,8 @@ import { AuthContext } from '../../App';
 import { tokens } from '../../themes';
 import axios from 'axios';
 import { useTheme } from '@emotion/react';
-import dayjs from 'dayjs';
 import { Button, ButtonGroup, Menu, Typography } from '@mui/material';
-import { AddCircle, ArrowBackIosSharp, ArrowDropDown, ArrowForwardIosTwoTone, DeleteTwoTone, Done, EditTwoTone } from '@mui/icons-material';
+import {  ArrowBackIosSharp, ArrowDropDown, ArrowForwardIosTwoTone, DeleteTwoTone, Done, EditTwoTone } from '@mui/icons-material';
 import { CalendarIcon } from '@mui/x-date-pickers';
 import WeekPicker from '../WeekPicker';
 import { mockTimeEntries, mockprojectData } from '../../data/mockData';
@@ -27,6 +26,7 @@ const Example = () => {
   const [Entry, setEntry] = useState([]);
   const [editableIndex, seteditableIndex] = useState(null);
   const [editableArray, seteditableArray] = useState();
+  const [errorMessages, setErrorMessages] = useState([]);
 
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
@@ -45,7 +45,9 @@ const Example = () => {
   }, [])
 
   useEffect(() => {
-    getPrevProjectTimeEntries(selectedProject, new Date(CurrentStartDate).toLocaleDateString('en-CA'), new Date(CurrentEndDate).toLocaleDateString('en-CA'))
+    if(CurrentStartDate != undefined) {
+      getPrevProjectTimeEntries(selectedProject, new Date(CurrentStartDate).toLocaleDateString('en-CA'), new Date(CurrentEndDate).toLocaleDateString('en-CA'))
+    }
   }, [CurrentStartDate])
 
   console.log(selectedProject)
@@ -190,43 +192,6 @@ const Example = () => {
     }
   }
 
-
-  /*const getDateRange = (startDate, endDate, empId) => {
-    setEntry([]);
-    setdateRange([]);
-    const newEntry = [];
-    const currentDate = new Date(startDate);
-    while (currentDate <= endDate) {
-      const formattedDate = currentDate.toLocaleDateString('en-CA'); // Format as 'YYYY-MM-DD'
-      const todatestring = currentDate.toDateString();
-      setdateRange((prevdata) => [...prevdata, todatestring]);
-      console.log(currentDate.toDateString());
-      const existingEntry = fetchTimeEntries?.find(entry => entry.date === formattedDate && entry.projectEmployee.empID === (empId == undefined||null ? selectedProject : empId));
-      console.log(fetchTimeEntries?.map(entry => console.log(entry.date)))
-      console.log(formattedDate)
-      if (existingEntry) {
-        // Use the existing entry
-        newEntry.push(existingEntry);
-      } else {
-        // Create a new entry
-        newEntry.push({
-          projectEmployee: {
-            empID: (empId == undefined||null ? selectedProject : empId),
-          },
-          user: {
-            userId: user.userId,
-          },
-          date: formattedDate,
-          minutes: "",
-          task: ""
-        });
-      }
-      currentDate.setDate(currentDate.getDate() + 1);
-    }
-    setEntry(newEntry);
-  };
-  */
-
   const handleProjectChange = (empId) => {
     setselectedProject(empId)
     getPrevProjectTimeEntries(empId, CurrentStartDate.toLocaleDateString('en-CA'), CurrentEndDate.toLocaleDateString('en-CA'))
@@ -240,25 +205,18 @@ const Example = () => {
     });
   };
 
-  const handleEntryArrayChange = (action, index) => {
-    if (action == "remove") {
-      let dateObject = new Date(CurrentStartDate);
-      dateObject.setDate(dateObject.getDate() + index);
+  console.log(errorMessages)
 
+  const handleEntryArrayChange = (action, index) => {
+    if (action === "remove") {
       const newArray = [...fetchProjectTimeEntries];
-      newArray.splice(index, 1);
-      const newEntry = {
-        user: {
-          userId: user.userId,
-        },
-        date: dateObject.toLocaleDateString('en-CA'),
-        projectEmployee: {
-          empID: selectedProject,
-        },
+      newArray.splice(index, 1, {
+        user: { userId: user.userId },
+        date: new Date(CurrentStartDate).toLocaleDateString('en-CA'),
+        projectEmployee: { empID: selectedProject },
         minutes: "",
         task: "",
-      };
-      newArray.splice(index, 0, newEntry);
+      });
       setfetchProjectTimeEntries(newArray);
     }
   };
@@ -275,6 +233,8 @@ const Example = () => {
   }
 
   const handleSave = async () => {
+    
+    
     const newEntry = fetchProjectTimeEntries.filter(item => !item.timesheetId && item.minutes != "")
     console.log(newEntry)
     try {
@@ -316,8 +276,8 @@ const Example = () => {
   console.log(fetchTimeEntries)
 
   return (
-    <div className="w-10/12 mx-auto flex flex-col gap-4">
-      <h1 className="text-4xl">Timesheet</h1>
+    <div className="w-10/12 mx-auto mt-5 flex flex-col gap-4">
+      <Typography variant='h2'>Timesheet</Typography>
       <div className='flex flex-col gap-2'>
         <div className='flex justify-between items-center'>
           <div className='flex flex-row gap-1'>
@@ -370,20 +330,20 @@ const Example = () => {
 
         <form>
           <div className="overflow-x-auto">
-            <table className="w-4/5 mx-auto my-0 rounded-lg shadow-md overflow-hidden">
+            <table className="w-11/12 mx-auto my-0 rounded-lg shadow-md overflow-hidden">
               <thead>
                 <tr className="text-xs text-left text-gray-300 bg-gray-700 border-b uppercase">
-                  <th className="p-4">Date</th>
-                  <th className="p-4">Hours</th>
-                  <th className="p-4">Task</th>
-                  <th className="p-2"></th>
+                  <th className="p-3">Date</th>
+                  <th className="p-3">Hours</th>
+                  <th className="p-3">Task</th>
+                  <th className="p-1"></th>
                 </tr>
               </thead>
 
               <tbody>
                 {fetchProjectTimeEntries?.map((item, index) => (
                   <tr key={index} className={editableIndex !== index ? "p-1 border-b bg-white" : "p-1 border-b bg-blue-300"}>
-                    <td>
+                    <td className="w-1/12">
                       <input
                         readOnly
                         disabled={item.timesheetId}
@@ -393,7 +353,7 @@ const Example = () => {
                         className="w-full p-1.5 bg-slate-100 border border-transparent rounded-md focus:outline-none focus:border-gray-200 focus:bg-slate-200"
                       ></input>
                     </td>
-                    <td>
+                    <td className="w-2/12">
                       <input
                         disabled={item.timesheetId && editableIndex != index}
                         type="text"
@@ -408,8 +368,9 @@ const Example = () => {
                           handleFieldChange(index, "minutes", e.target.value)
                         }
                       ></input>
+                      {/*<div className="text-red-500 text-xs">{errorMessages[index]}</div>*/}
                     </td>
-                    <td>
+                    <td className="w-9/12">
                       <input
                         disabled={item.timesheetId && editableIndex != index}
                         placeholder="Task"
@@ -419,11 +380,10 @@ const Example = () => {
                         onChange={(e) =>
                           handleFieldChange(index, "task", e.target.value)
                         }
-                        size={60}
                         className="w-full p-2 bg-slate-100 border border-transparent rounded-md focus:outline-none focus:border-gray-200 focus:bg-slate-200"
                       ></input>
                     </td>
-                    <td>
+                    <td className="w-1/12">
                       <div className="flex justify-center gap-3">
                         {!item.timesheetId ? (
                           <button
@@ -475,6 +435,7 @@ const Example = () => {
 
 
       <div className="container mx-auto">
+      <Typography variant='h2'>View Saved</Typography>
         <table className="min-w-full bg-white border border-gray-300">
           <thead>
             <tr>
@@ -499,7 +460,7 @@ const Example = () => {
                     <tr className={taskIndex % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
                       <td className="py-2 px-4 border-b">{task.date}</td>
                       <td className="py-2 px-4 border-b">{task.projectEmployee.empID + ' - ' + task.projectEmployee.project.projectName}</td>
-                      <td className="py-2 px-4 border-b">{task.minutes}</td>
+                      <td className="py-2 px-4 border-b">{task.minutes/60}</td>
                       <td className="py-2 px-4 border-b">{task.task}</td>
                     </tr>
                   </React.Fragment>

@@ -15,6 +15,8 @@ import ViewTimesheet from './components/ViewTimesheet/ViewTimesheet';
 import Approval from './components/Approvals/Approval';
 import ViewSubmitted from './components/TimeEntries/ViewSubmitted';
 import Samplepage from './components/Calendar/Samplepage';
+import TimesheetReports from './components/TimesheetReports/TimesheetReports';
+import PdfGeneration from './components/TimesheetReports/PdfGeneration';
 
 export const AuthContext = createContext();
 
@@ -52,20 +54,22 @@ function App() {
       <AuthContext.Provider value={{ user, login, logout }}>
             <Routes>
               <Route path='/' element={<LoginForm/>}/>
-              <Route path='employee' element={<Employee/>}>
+              <Route path='e' element={<Employee/>}>
                 <Route index element={<Dashboard/>}/>
                 <Route path='timeentries' element={<TimeEntries/>}/>
                 <Route path='viewtimesheet' element={<ViewTimesheet/>}/>
                 <Route path='viewsubmitted' element={<ViewSubmitted/>}/>
                 <Route path='calendar' element={<Samplepage/>}/>
               </Route>
-              <Route path='manager' element={<Manager/>}>
+              <Route path='m' element={<Manager/>}>
                 <Route index element={<Dashboard/>}/>
                 <Route path='timeentries' element={<TimeEntries/>}/>
                 <Route path='viewtimesheet' element={<ViewTimesheet/>}/>
                 <Route path='approvals' element={<Approval/>}/>
                 <Route path='calendar' element={<Samplepage/>}/>
+                <Route path='timesheetreports' element={<TimesheetReports/>}/>
               </Route>
+              <Route path='/generateReport' element={<PdfGeneration/>}/>
             </Routes>
       </AuthContext.Provider>
     </ThemeProvider>
