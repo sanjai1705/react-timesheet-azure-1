@@ -43,7 +43,7 @@ const Samplepage = () => {
   const handleDoneClick =  async() => {
     editableArray.minutes=editableArray.minutes*60
     try {
-      const response = await axios.put(`http://localhost:8080/Timesheet/EmployeeTimeentries/Update/${editableArray.timesheetId}`, editableArray)
+      const response = await axios.put(`https://springboot-timesheet-azure.azurewebsites.net/Timesheet/EmployeeTimeentries/Update/${editableArray.timesheetId}`, editableArray)
       console.log(response)
     } catch (error) {
       console.log("Error while updating", error);
@@ -59,7 +59,7 @@ const Samplepage = () => {
       try {
         // First API call
         const response1 = await axios.get(
-          `http://localhost:8080/Timesheet/ProjectEmployee/user/${user.userId}`
+          `https://springboot-timesheet-azure.azurewebsites.net/Timesheet/ProjectEmployee/user/${user.userId}`
         );
         console.log(response1);
         const projects1 = response1.data.map((item) => ({
@@ -70,7 +70,7 @@ const Samplepage = () => {
         // Second API call
         ///*
         const response2 = await axios.get(
-          `http://localhost:8080/Timesheet/Project/applicable?applicable=true`
+          `https://springboot-timesheet-azure.azurewebsites.net/Timesheet/Project/applicable?applicable=true`
         );
         console.log(response2);
         const projects2 = response2.data.map((item) => ({
@@ -100,7 +100,7 @@ const Samplepage = () => {
   const getPrevTimeEntries = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:8080/Timesheet/EmployeeTimeentries/empty-status/user/${user.userId}`
+        `https://springboot-timesheet-azure.azurewebsites.net/Timesheet/EmployeeTimeentries/empty-status/user/${user.userId}`
       );
       console.log(response);
       setfetchTimeEntries(response.data);
@@ -159,7 +159,7 @@ const Samplepage = () => {
   const handleSave = async () => {
     try {
       const response = await axios.post(
-        "http://localhost:8080/Timesheet/EmployeeTimeentries/EmployeeUserProjectCreate1",
+        "https://springboot-timesheet-azure.azurewebsites.net/Timesheet/EmployeeTimeentries/EmployeeUserProjectCreate1",
         Entry
       );
       console.log(response);
@@ -184,7 +184,7 @@ const Samplepage = () => {
 
   const handleDelete = async(timesheetId) => {
     try {
-      const response = await axios.delete(`http://localhost:8080/Timesheet/EmployeeTimeentries/Delete/${timesheetId}`)
+      const response = await axios.delete(`https://springboot-timesheet-azure.azurewebsites.net/Timesheet/EmployeeTimeentries/Delete/${timesheetId}`)
       console.log(response)
     } catch(error) {
       console.log('Error while changing status:', error)
@@ -194,7 +194,7 @@ const Samplepage = () => {
   const handleStatusSubmit = async() => {
     const queryString = `?userId=${user.userId}&startId=${fetchTimeEntries[0].timesheetId}&endId=${fetchTimeEntries[fetchTimeEntries.length-1].timesheetId}`;
     try {
-      const response = await axios.post(`http://localhost:8080/Timesheet/EmployeeTimeentries/submit${queryString}`)
+      const response = await axios.post(`https://springboot-timesheet-azure.azurewebsites.net/Timesheet/EmployeeTimeentries/submit${queryString}`)
       console.log(response)
     } catch(error) {
       console.log('Error while changing status:', error)
@@ -515,7 +515,7 @@ const Samplepage = () => {
   const getManEmpInfo = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:8080/Timesheet/EmployeeManager/Manager/${user.userId}`
+        `https://springboot-timesheet-azure.azurewebsites.net/Timesheet/EmployeeManager/Manager/${user.userId}`
       );
       setfetchManEmpInfo(response.data);
       console.log(response.data);
@@ -528,7 +528,7 @@ const Samplepage = () => {
     try {
       const fetchData = fetchManEmpInfo?.map(async (item) => {
         const response = await axios.get(
-          `http://localhost:8080/Timesheet/EmployeeTimeentries/submitted/user/${item.user1.userId}`
+          `https://springboot-timesheet-azure.azurewebsites.net/Timesheet/EmployeeTimeentries/submitted/user/${item.user1.userId}`
         );
         return response.data;
       });

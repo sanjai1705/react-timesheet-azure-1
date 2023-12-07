@@ -53,7 +53,7 @@ const Approval = () => {
   const getManEmpInfo = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:8080/Timesheet/EmployeeManager/Manager/${user.userId}`
+        `https://springboot-timesheet-azure.azurewebsites.net/Timesheet/EmployeeManager/Manager/${user.userId}`
       );
       setfetchManEmpInfo(response.data);
     } catch (error) {
@@ -117,7 +117,7 @@ const Approval = () => {
     try {
       const fetchData = fetchManEmpInfo?.map(async (item) => {
         const queryString = `${item.user1.userId}?startDate=${startDate}&endDate=${endDate}`;
-        const response = await axios.get(`http://localhost:8080/Timesheet/DaywiseTimesheet/notempty-status/user/${queryString}`)
+        const response = await axios.get(`https://springboot-timesheet-azure.azurewebsites.net/Timesheet/DaywiseTimesheet/notempty-status/user/${queryString}`)
         console.log(response.data);
         return [response.data];
       })
@@ -148,10 +148,10 @@ const Approval = () => {
         const queryString = `?userId=${item.user1.userId}&startdate=${startDate}&enddate=${endDate}`;
         
         // Make an asynchronous axios GET request to fetch data
-        const response = await axios.get(`http://localhost:8080/Timesheet/DaywiseTimesheet/Customdate${queryString}`);
+        const response = await axios.get(`https://springboot-timesheet-azure.azurewebsites.net/Timesheet/DaywiseTimesheet/Customdate${queryString}`);
         console.log(response.data);
         
-        //const response1 = await axios.get(`http://localhost:8080/Timesheet/DaywiseTimesheet/CustomdateTotalworkinghours${queryString}`)
+        //const response1 = await axios.get(`https://springboot-timesheet-azure.azurewebsites.net/Timesheet/DaywiseTimesheet/CustomdateTotalworkinghours${queryString}`)
         //console.log(response1)
        //settotalWorkingHours((prevData) => [...prevData, response1.data]);
         // Return the data from each axios request as an array
@@ -237,7 +237,7 @@ const Approval = () => {
       selectedRows.map(async(item, index) => {
         if(item == combinedRow[index].id) {
           const queryString = `?userId=${combinedRow[index].userId}&startdate=${selectedstartDate}&enddate=${selectedendDate}`;
-          const response = await axios.post(`http://localhost:8080/Timesheet/DaywiseTimesheet/approved${queryString}`)
+          const response = await axios.post(`https://springboot-timesheet-azure.azurewebsites.net/Timesheet/DaywiseTimesheet/approved${queryString}`)
           console.log(response)
         }
     })
@@ -252,7 +252,7 @@ const Approval = () => {
       selectedRows.map(async(item, index) => {
         if(item == combinedRow[index].id) {
           const queryString = `?userId=${combinedRow[index].userId}&startDate=${selectedstartDate}&endDate=${selectedendDate}&description=${combinedRow[index].desc}`;
-          const response = await axios.post(`http://localhost:8080/Timesheet/DaywiseTimesheet/rejected${queryString}`)
+          const response = await axios.post(`https://springboot-timesheet-azure.azurewebsites.net/Timesheet/DaywiseTimesheet/rejected${queryString}`)
           console.log(response)
         }
     })

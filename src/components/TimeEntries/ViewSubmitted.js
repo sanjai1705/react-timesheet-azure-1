@@ -11,7 +11,7 @@ const ViewSubmitted = () => {
   useEffect(()=>{
     const getGroupedData = async() => {
       try{
-        const response = await axios.get(`http://localhost:8080/Timesheet/DaywiseTimesheet/grouped`)
+        const response = await axios.get(`https://springboot-timesheet-azure.azurewebsites.net/Timesheet/DaywiseTimesheet/grouped`)
         console.log(response)
         const data = response.data
         data.map((timeStamps) => {

@@ -58,7 +58,7 @@ const Example = () => {
     const queryString = `?projectEmployeeId=${empId}&userId=${user.userId}&startDate=${startDate}&endDate=${endDate}`
     console.log(queryString)
     try {
-      const response = await axios.get(`http://localhost:8080/Timesheet/customdate${queryString}`);
+      const response = await axios.get(`https://springboot-timesheet-azure.azurewebsites.net/Timesheet/customdate${queryString}`);
       console.log(response)
       const newArray = []
       while (startDate <= endDate) {
@@ -100,7 +100,7 @@ const Example = () => {
     const queryString = `?userId=${user.userId}&startdate=${startDate}&enddate=${endDate}`;
     console.log(queryString)
     try {
-      const response = await axios.get(`http://localhost:8080/Timesheet/EmployeeTimeentries/Customdate${queryString}`);
+      const response = await axios.get(`https://springboot-timesheet-azure.azurewebsites.net/Timesheet/EmployeeTimeentries/Customdate${queryString}`);
       console.log(response)
       const groupedByDate = response.data.reduce((acc, entry) => {
         const date = entry.date;
@@ -123,7 +123,7 @@ const Example = () => {
   const getProjects = async () => {
     try {
       // First API call
-      const response1 = await axios.get(`http://localhost:8080/Timesheet/ProjectEmployee/user/${user.userId}`);
+      const response1 = await axios.get(`https://springboot-timesheet-azure.azurewebsites.net/Timesheet/ProjectEmployee/user/${user.userId}`);
       console.log(response1);
       const projects1 = response1.data.map((item) => ({
         empID: item.empID,
@@ -145,7 +145,7 @@ const Example = () => {
       handleWeekPickerChange(new Date().toString())
       await getPrevProjectTimeEntries(projects1[0].empID, startdate.toLocaleDateString('en-CA'), enddate.toLocaleDateString('en-CA'))
       // Second API call
-      /*const response2 = await axios.get(`http://localhost:8080/Timesheet/Project/applicable?applicable=true`);
+      /*const response2 = await axios.get(`https://springboot-timesheet-azure.azurewebsites.net/Timesheet/Project/applicable?applicable=true`);
       console.log(response2);
       const projects2 = response2.data.map((item) => ({
           empID: item.projectId,
@@ -225,7 +225,7 @@ const Example = () => {
     const queryString = `?userId=${user.userId}&startdate=${CurrentStartDate.toLocaleDateString('en-CA')}&enddate=${CurrentEndDate.toLocaleDateString('en-CA')}`;
     console.log(queryString)
     try {
-      const response = await axios.post(`http://localhost:8080/Timesheet/DaywiseTimesheet/submit${queryString}`)
+      const response = await axios.post(`https://springboot-timesheet-azure.azurewebsites.net/Timesheet/DaywiseTimesheet/submit${queryString}`)
       console.log(response)
     } catch (error) {
       console.log('Error while changing status:', error)
@@ -239,7 +239,7 @@ const Example = () => {
     console.log(newEntry)
     try {
       const response = await axios.post(
-        "http://localhost:8080/Timesheet/EmployeeTimeentries/EmployeeUserProjectCreate1",
+        "https://springboot-timesheet-azure.azurewebsites.net/Timesheet/EmployeeTimeentries/EmployeeUserProjectCreate1",
         newEntry
       );
       console.log(response);
@@ -261,7 +261,7 @@ const Example = () => {
   const handleDoneClick = async () => {
     editableArray.minutes = editableArray.minutes * 60
     try {
-      const response = await axios.put(`http://localhost:8080/Timesheet/EmployeeTimeentries/Update/${editableArray.timesheetId}`, editableArray)
+      const response = await axios.put(`https://springboot-timesheet-azure.azurewebsites.net/Timesheet/EmployeeTimeentries/Update/${editableArray.timesheetId}`, editableArray)
       console.log(response)
     } catch (error) {
       console.log("Error while updating", error);

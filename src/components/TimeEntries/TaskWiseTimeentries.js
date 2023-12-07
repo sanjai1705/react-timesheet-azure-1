@@ -44,7 +44,7 @@ const TaskWiseTimeentries = () => {
   const getPrevTimeEntries = async () => {
     const queryString = `?userId=${user.userId}&startdate=${CurrentStartDate}&enddate=${CurrentEndDate}`;
     try {
-      const response = await axios.get(`http://localhost:8080/Timesheet/EmployeeTimeentries/Customdate${queryString}`);
+      const response = await axios.get(`https://springboot-timesheet-azure.azurewebsites.net/Timesheet/EmployeeTimeentries/Customdate${queryString}`);
       console.log(response)
       setfetchTimeEntries(response.data)
   } catch (error) {
@@ -56,7 +56,7 @@ const TaskWiseTimeentries = () => {
     const getProjects = async () => {
         try {
             // First API call
-            const response1 = await axios.get(`http://localhost:8080/Timesheet/ProjectEmployee/user/${user.userId}`);
+            const response1 = await axios.get(`https://springboot-timesheet-azure.azurewebsites.net/Timesheet/ProjectEmployee/user/${user.userId}`);
             console.log(response1);
             const projects1 = response1.data.map((item) => ({
                 empID: item.empID,
@@ -64,7 +64,7 @@ const TaskWiseTimeentries = () => {
             }))
 
             // Second API call
-            const response2 = await axios.get(`http://localhost:8080/Timesheet/Project/applicable?applicable=true`);
+            const response2 = await axios.get(`https://springboot-timesheet-azure.azurewebsites.net/Timesheet/Project/applicable?applicable=true`);
             console.log(response2);
             const projects2 = response2.data.map((item) => ({
                 empID: item.projectId,
@@ -200,7 +200,7 @@ console.log(Entry)
 const handleStatusSubmit = async() => {
   const queryString = `?userId=${user.userId}&startId=${fetchTimeEntries[0].timesheetId}&endId=${fetchTimeEntries[fetchTimeEntries.length-1].timesheetId}`;
   try {
-    const response = await axios.post(`http://localhost:8080/Timesheet/EmployeeTimeentries/submit${queryString}`)
+    const response = await axios.post(`https://springboot-timesheet-azure.azurewebsites.net/Timesheet/EmployeeTimeentries/submit${queryString}`)
     console.log(response)
   } catch(error) {
     console.log('Error while changing status:', error)
@@ -217,7 +217,7 @@ const handleValidate = (event) => {
 const handleSave = async () => {
   try {
     const response = await axios.post(
-      "http://localhost:8080/Timesheet/EmployeeTimeentries/EmployeeUserProjectCreate1",
+      "https://springboot-timesheet-azure.azurewebsites.net/Timesheet/EmployeeTimeentries/EmployeeUserProjectCreate1",
       Entry
     );
     console.log(response);

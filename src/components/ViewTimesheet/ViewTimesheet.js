@@ -65,7 +65,7 @@ const ViewTimesheet = () => {
   const getManEmpInfo = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:8080/Timesheet/EmployeeManager/Manager/${user.userId}`
+        `https://springboot-timesheet-azure.azurewebsites.net/Timesheet/EmployeeManager/Manager/${user.userId}`
       );
       setfetchManEmpInfo(response.data);
     } catch (error) {
@@ -106,7 +106,7 @@ const ViewTimesheet = () => {
   const getDATA = async (startDate, endDate) => {
     try {
       const fetchData = fetchManEmpInfo?.map(async (item) => {
-        const response = await axios.get(`http://localhost:8080/Timesheet/EmployeeTimeentries/submitted/user/${item.user1.userId}`);
+        const response = await axios.get(`https://springboot-timesheet-azure.azurewebsites.net/Timesheet/EmployeeTimeentries/submitted/user/${item.user1.userId}`);
         return response.data;
       });
       const responseData = await Promise.all(fetchData);
