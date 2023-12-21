@@ -21,27 +21,17 @@ jobs:
         with:
           node-version: '18.x'
 
-      - name: npm install
+      - name: npm install, build, and test
         run: |
           npm install
-          npm install react-pro-sidebar@0.7.1
-
-      - name: Build React app with warnings allowed
-        run: npm run build
-        env:
-          CI: false  # Set CI to false during the build step
-
-      - name: Zip Release
-        uses: TheDoctor0/zip-release@0.7.6
-        with:
-          filename: release.zip
-          path: ./build/*
-          
+          npm run build --if-present
+          npm run test --if-present
+      
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v3
         with:
           name: node-app
-          path: release.zip
+          path: .
 
   deploy:
     runs-on: ubuntu-latest
@@ -49,18 +39,18 @@ jobs:
     environment:
       name: 'Production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
-
+    
     steps:
       - name: Download artifact from build job
         uses: actions/download-artifact@v3
         with:
           name: node-app
-
+      
       - name: 'Deploy to Azure Web App'
         uses: azure/webapps-deploy@v2
         id: deploy-to-webapp
         with:
           app-name: 'timesheet-react'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_51519D1C1ED94DE5BC49E2A045E6C93B }}
-          package: release.zip
+          package: .
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_3841364BC8C84C1DB56437CA2A4D16D9 }}
