@@ -10,6 +10,7 @@ import { useEffect } from 'react';
 import axios from 'axios';
 import { useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableRow, colors } from '@mui/material';
+import API_BASE_URL from '../apiConfig';
 
 
 export default function FormDialog({ dayWiseTimeEntries }) {
@@ -46,7 +47,7 @@ export default function FormDialog({ dayWiseTimeEntries }) {
       const queryString = `?userId=${sentData[0].user.userId}&startdate=${startDate}&enddate=${endDate}`;
       
       const fetchData = async() => {
-        const response = await axios.get(`http://localhost:8080/Timesheet/EmployeeTimeentries/Customdate${queryString}`);
+        const response = await axios.get(`${API_BASE_URL}/EmployeeTimeentries/Customdate${queryString}`);
         console.log(response)
         const groupedByDate = {};
 

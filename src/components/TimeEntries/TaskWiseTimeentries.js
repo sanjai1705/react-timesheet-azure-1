@@ -12,6 +12,7 @@ import { AuthContext } from '../../App';
 import WeekPicker from '../WeekPicker';
 import { tokens } from '../../themes';
 import { mockprojectData } from '../../data/mockData';
+import API_BASE_URL from '../../apiConfig';
 
 const TaskWiseTimeentries = () => {
   const { user, logout } = useContext(AuthContext);
@@ -44,7 +45,7 @@ const TaskWiseTimeentries = () => {
   const getPrevTimeEntries = async () => {
     const queryString = `?userId=${user.userId}&startdate=${CurrentStartDate}&enddate=${CurrentEndDate}`;
     try {
-      const response = await axios.get(`http://localhost:8080/Timesheet/EmployeeTimeentries/Customdate${queryString}`);
+      const response = await axios.get(`${API_BASE_URL}/EmployeeTimeentries/Customdate${queryString}`);
       console.log(response)
       setfetchTimeEntries(response.data)
   } catch (error) {
@@ -56,7 +57,7 @@ const TaskWiseTimeentries = () => {
     const getProjects = async () => {
         try {
             // First API call
-            const response1 = await axios.get(`http://localhost:8080/Timesheet/ProjectEmployee/user/${user.userId}`);
+            const response1 = await axios.get(`${API_BASE_URL}/ProjectEmployee/user/${user.userId}`);
             console.log(response1);
             const projects1 = response1.data.map((item) => ({
                 empID: item.empID,
@@ -64,7 +65,7 @@ const TaskWiseTimeentries = () => {
             }))
 
             // Second API call
-            const response2 = await axios.get(`http://localhost:8080/Timesheet/Project/applicable?applicable=true`);
+            const response2 = await axios.get(`${API_BASE_URL}/Project/applicable?applicable=true`);
             console.log(response2);
             const projects2 = response2.data.map((item) => ({
                 empID: item.projectId,
@@ -200,7 +201,7 @@ console.log(Entry)
 const handleStatusSubmit = async() => {
   const queryString = `?userId=${user.userId}&startId=${fetchTimeEntries[0].timesheetId}&endId=${fetchTimeEntries[fetchTimeEntries.length-1].timesheetId}`;
   try {
-    const response = await axios.post(`http://localhost:8080/Timesheet/EmployeeTimeentries/submit${queryString}`)
+    const response = await axios.post(`${API_BASE_URL}/EmployeeTimeentries/submit${queryString}`)
     console.log(response)
   } catch(error) {
     console.log('Error while changing status:', error)
@@ -217,7 +218,7 @@ const handleValidate = (event) => {
 const handleSave = async () => {
   try {
     const response = await axios.post(
-      "http://localhost:8080/Timesheet/EmployeeTimeentries/EmployeeUserProjectCreate1",
+      "${API_BASE_URL}/EmployeeTimeentries/EmployeeUserProjectCreate1",
       Entry
     );
     console.log(response);

@@ -43,7 +43,7 @@ const Approval = () => {
   const handleDoneClick =  async() => {
     editableArray.minutes=editableArray.minutes*60
     try {
-      const response = await axios.put(`http://localhost:8080/Timesheet/EmployeeTimeentries/Update/${editableArray.timesheetId}`, editableArray)
+      const response = await axios.put(`${API_BASE_URL}/EmployeeTimeentries/Update/${editableArray.timesheetId}`, editableArray)
       console.log(response)
     } catch (error) {
       console.log("Error while updating", error);
@@ -59,7 +59,7 @@ const Approval = () => {
       try {
         // First API call
         const response1 = await axios.get(
-          `http://localhost:8080/Timesheet/ProjectEmployee/user/${user.userId}`
+          `${API_BASE_URL}/ProjectEmployee/user/${user.userId}`
         );
         console.log(response1);
         const projects1 = response1.data.map((item) => ({
@@ -70,7 +70,7 @@ const Approval = () => {
         // Second API call
         ///*
         const response2 = await axios.get(
-          `http://localhost:8080/Timesheet/Project/applicable?applicable=true`
+          `${API_BASE_URL}/Project/applicable?applicable=true`
         );
         console.log(response2);
         const projects2 = response2.data.map((item) => ({
@@ -100,7 +100,7 @@ const Approval = () => {
   const getPrevTimeEntries = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:8080/Timesheet/EmployeeTimeentries/empty-status/user/${user.userId}`
+        `${API_BASE_URL}/EmployeeTimeentries/empty-status/user/${user.userId}`
       );
       console.log(response);
       setfetchTimeEntries(response.data);
@@ -159,7 +159,7 @@ const Approval = () => {
   const handleSave = async () => {
     try {
       const response = await axios.post(
-        "http://localhost:8080/Timesheet/EmployeeTimeentries/EmployeeUserProjectCreate1",
+        "${API_BASE_URL}/EmployeeTimeentries/EmployeeUserProjectCreate1",
         Entry
       );
       console.log(response);
@@ -184,7 +184,7 @@ const Approval = () => {
 
   const handleDelete = async(timesheetId) => {
     try {
-      const response = await axios.delete(`http://localhost:8080/Timesheet/EmployeeTimeentries/Delete/${timesheetId}`)
+      const response = await axios.delete(`${API_BASE_URL}/EmployeeTimeentries/Delete/${timesheetId}`)
       console.log(response)
     } catch(error) {
       console.log('Error while changing status:', error)
@@ -194,7 +194,7 @@ const Approval = () => {
   const handleStatusSubmit = async() => {
     const queryString = `?userId=${user.userId}&startId=${fetchTimeEntries[0].timesheetId}&endId=${fetchTimeEntries[fetchTimeEntries.length-1].timesheetId}`;
     try {
-      const response = await axios.post(`http://localhost:8080/Timesheet/EmployeeTimeentries/submit${queryString}`)
+      const response = await axios.post(`${API_BASE_URL}/EmployeeTimeentries/submit${queryString}`)
       console.log(response)
     } catch(error) {
       console.log('Error while changing status:', error)
@@ -460,6 +460,7 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
+import API_BASE_URL from "../../apiConfig";
 
 const Approval = () => {
   const { user } = useContext(AuthContext);
@@ -515,7 +516,7 @@ const Approval = () => {
   const getManEmpInfo = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:8080/Timesheet/EmployeeManager/Manager/${user.userId}`
+        `${API_BASE_URL}/EmployeeManager/Manager/${user.userId}`
       );
       setfetchManEmpInfo(response.data);
       console.log(response.data);
@@ -528,7 +529,7 @@ const Approval = () => {
     try {
       const fetchData = fetchManEmpInfo?.map(async (item) => {
         const response = await axios.get(
-          `http://localhost:8080/Timesheet/EmployeeTimeentries/submitted/user/${item.user1.userId}`
+          `${API_BASE_URL}/EmployeeTimeentries/submitted/user/${item.user1.userId}`
         );
         return response.data;
       });
@@ -700,7 +701,6 @@ const Approval = () => {
       }
     }
   };
-  
 
   const mockRows = [9870, 9871];
 
@@ -709,7 +709,7 @@ const Approval = () => {
       mockRows.map(async (item) => {
         console.log(item);
         const response = await axios.post(
-          `https://springboot-timesheet-azure.azurewebsites.net/Timesheet/EmployeeTimeentries/approved?timesheetId=${item}`
+          `${API_BASE_URL}/EmployeeTimeentries/approved?timesheetId=${item}`
         );
         console.log(response);
       });

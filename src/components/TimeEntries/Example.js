@@ -212,8 +212,11 @@ const Example = () => {
   console.log(errorMessages)
 
   const handleEntryArrayChange = (action, index) => {
+    const newArray = [...fetchProjectTimeEntries];
     if (action === "remove") {
-      const newArray = [...fetchProjectTimeEntries];
+      if (newArray[index].timesheetId) {
+        handleDelete(newArray[index].timesheetId)   // Condition to delete it in backend database if it exists there
+      }
       newArray.splice(index, 1, {
         user: { userId: user.userId },
         date: newArray[index].date,
@@ -224,8 +227,7 @@ const Example = () => {
       setfetchProjectTimeEntries(newArray);
     }
 
-    else if(action === 'add') {
-      const newArray = [...fetchProjectTimeEntries];
+    else if(action === "add") {
       newArray.splice(index+1, 0, {
         user: { userId: user.userId },
         date: newArray[index].date,
@@ -253,7 +255,7 @@ const Example = () => {
     console.log(newEntry)
     try {
       const response = await axios.post(
-        "${API_BASE_URL}/EmployeeTimeentries/EmployeeUserProjectCreate1",
+        `${API_BASE_URL}/EmployeeTimeentries/EmployeeUserProjectCreate1`,
         newEntry
       );
       console.log(response);
@@ -284,6 +286,18 @@ const Example = () => {
     seteditableIndex()
 
     getPrevTimeEntries(CurrentStartDate.toLocaleDateString('en-CA'), CurrentEndDate.toLocaleDateString('en-CA'))
+  };
+
+  const handleDelete = async (timesheetId) => {
+    try {
+      const response = await axios.delete(`${API_BASE_URL}/EmployeeTimeentries/Delete/${timesheetId}`);
+      setfetchTimeEntries((prevData) => {
+        const newData = prevData.filter((item) => item.timesheetId !== timesheetId); // Remove the deleted entry from the array
+        return newData;
+      });
+  } catch (error) {
+      console.log("Error fetching data:", error);
+    }
   };
 
   console.log(fetchTimeEntries)

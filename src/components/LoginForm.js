@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { mockDataTeam } from "../data/mockData";
 import { AuthContext } from "../App";
 import loginbg from "../../src/login-bg.jpg";
+import API_BASE_URL from "../apiConfig";
 
 function LoginForm() {
   const { user, login } = useContext(AuthContext);
@@ -44,10 +45,9 @@ function LoginForm() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-
     try {
       const response = await axios.post(
-        "http://localhost:8080/Timesheet/login",
+        `${API_BASE_URL}/login`,
         {
           username,
           password,

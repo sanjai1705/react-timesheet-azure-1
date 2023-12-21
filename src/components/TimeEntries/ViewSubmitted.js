@@ -3,6 +3,7 @@ import { Accordion, AccordionDetails, AccordionSummary, Box, Table, TableBody, T
 import axios from 'axios';
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom';
+import API_BASE_URL from '../../apiConfig';
 
 const ViewSubmitted = () => {
   const history = useNavigate();
@@ -11,7 +12,7 @@ const ViewSubmitted = () => {
   useEffect(()=>{
     const getGroupedData = async() => {
       try{
-        const response = await axios.get(`http://localhost:8080/Timesheet/DaywiseTimesheet/grouped`)
+        const response = await axios.get(`${API_BASE_URL}/DaywiseTimesheet/grouped`)
         console.log(response)
         const data = response.data
         data.map((timeStamps) => {

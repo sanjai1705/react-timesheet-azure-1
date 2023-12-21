@@ -5,6 +5,7 @@ import axios from 'axios';
 import styled from '@emotion/styled';
 import { AuthContext } from '../../App';
 import NameMenuButton from '../global/NameMenuButton';
+import API_BASE_URL from '../../apiConfig';
 
 const Dashboard = () => {
   const { user, login } = useContext(AuthContext);
@@ -25,7 +26,7 @@ const Dashboard = () => {
   useEffect(() => {
     const getData = async () => {
       try {
-        const response = await axios.get(`http://localhost:8080/Timesheet/Users/${userId}`);
+        const response = await axios.get(`${API_BASE_URL}/Users/${userId}`);
         console.log(response)
         setfetchUserInfo(response.data)
     } catch (error) {

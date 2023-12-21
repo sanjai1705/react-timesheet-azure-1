@@ -26,6 +26,7 @@ import { AuthContext } from '../../App';
 import { CalendarIcon, DateCalendar } from '@mui/x-date-pickers';
 import dayjs, { Dayjs } from 'dayjs';
 import { mockprojectData } from '../../data/mockData';
+import API_BASE_URL from '../../apiConfig';
 
 
 const DayWiseTimeentries = () => {
@@ -64,7 +65,7 @@ const DayWiseTimeentries = () => {
     if (newEntry.login < newEntry.logout) {
       if (newEntry.date && newEntry.login && newEntry.logout) {
         try {
-          const response = await axios.post("http://localhost:8080/Timesheet/EmployeeTimeentries/Create",newEntry);
+          const response = await axios.post("${API_BASE_URL}/EmployeeTimeentries/Create",newEntry);
           if (response.data !== "Not Saved") {
             console.log("Entry added successfully:", response.data);
             console.log(response);
@@ -106,7 +107,7 @@ const DayWiseTimeentries = () => {
    useEffect(() => {
     const getData = async () => {
       try {
-        const response = await axios.get(`http://localhost:8080/Timesheet/EmployeeTimeentries/user/${user.userId}`);
+        const response = await axios.get(`${API_BASE_URL}/EmployeeTimeentries/user/${user.userId}`);
         console.log(response)
         setfetchTimeEntries(response.data)
     } catch (error) {
@@ -120,7 +121,7 @@ const DayWiseTimeentries = () => {
     const getProjects = async () => {
         try {
             // First API call
-            const response1 = await axios.get(`http://localhost:8080/Timesheet/ProjectEmployee/user/${user.userId}`);
+            const response1 = await axios.get(`${API_BASE_URL}/ProjectEmployee/user/${user.userId}`);
             console.log(response1);
             const projects1 = response1.data.map((item) => ({
                 empID: item.empID,
@@ -128,7 +129,7 @@ const DayWiseTimeentries = () => {
             }))
 
             // Second API call
-            const response2 = await axios.get(`http://localhost:8080/Timesheet/Project/applicable?applicable=true`);
+            const response2 = await axios.get(`${API_BASE_URL}/Project/applicable?applicable=true`);
             console.log(response2);
             const projects2 = response2.data.map((item) => ({
                 empID: item.projectId,
@@ -152,7 +153,7 @@ const DayWiseTimeentries = () => {
 
   const handleDelete = async (timesheetId) => {
     try {
-      const response = await axios.delete(`http://localhost:8080/Timesheet/EmployeeTimeentries/Delete/${timesheetId}`);
+      const response = await axios.delete(`${API_BASE_URL}/EmployeeTimeentries/Delete/${timesheetId}`);
       setfetchTimeEntries((prevData) => {
         const newData = prevData.filter((item) => item.timesheetId !== timesheetId); // Remove the deleted entry from the array
         return newData;

@@ -21,6 +21,7 @@ import { CalendarIcon } from "@mui/x-date-pickers";
 import WeekPicker from "../WeekPicker";
 import FormDialog from "../Dialog";
 import { DataGrid } from "@mui/x-data-grid";
+import API_BASE_URL from "../../apiConfig";
 
 const ViewTimesheet = () => {
   const { user } = useContext(AuthContext);
@@ -53,7 +54,7 @@ const ViewTimesheet = () => {
   const getManEmpInfo = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:8080/Timesheet/EmployeeManager/Manager/${user.userId}`
+        `${API_BASE_URL}/EmployeeManager/Manager/${user.userId}`
       );
       setfetchManEmpInfo(response.data);
     } catch (error) {
@@ -117,7 +118,7 @@ const ViewTimesheet = () => {
     try {
       const fetchData = fetchManEmpInfo?.map(async (item) => {
         const queryString = `${item.user1.userId}?startDate=${startDate}&endDate=${endDate}`;
-        const response = await axios.get(`http://localhost:8080/Timesheet/DaywiseTimesheet/notempty-status/user/${queryString}`)
+        const response = await axios.get(`${API_BASE_URL}/DaywiseTimesheet/notempty-status/user/${queryString}`)
         console.log(response.data);
         return [response.data];
       })
@@ -148,10 +149,10 @@ const ViewTimesheet = () => {
         const queryString = `?userId=${item.user1.userId}&startdate=${startDate}&enddate=${endDate}`;
         
         // Make an asynchronous axios GET request to fetch data
-        const response = await axios.get(`http://localhost:8080/Timesheet/DaywiseTimesheet/Customdate${queryString}`);
+        const response = await axios.get(`${API_BASE_URL}/DaywiseTimesheet/Customdate${queryString}`);
         console.log(response.data);
         
-        //const response1 = await axios.get(`http://localhost:8080/Timesheet/DaywiseTimesheet/CustomdateTotalworkinghours${queryString}`)
+        //const response1 = await axios.get(`${API_BASE_URL}/DaywiseTimesheet/CustomdateTotalworkinghours${queryString}`)
         //console.log(response1)
        //settotalWorkingHours((prevData) => [...prevData, response1.data]);
         // Return the data from each axios request as an array
@@ -237,7 +238,7 @@ const ViewTimesheet = () => {
       selectedRows.map(async(item, index) => {
         if(item == combinedRow[index].id) {
           const queryString = `?userId=${combinedRow[index].userId}&startdate=${selectedstartDate}&enddate=${selectedendDate}`;
-          const response = await axios.post(`http://localhost:8080/Timesheet/DaywiseTimesheet/approved${queryString}`)
+          const response = await axios.post(`${API_BASE_URL}/DaywiseTimesheet/approved${queryString}`)
           console.log(response)
         }
     })
@@ -252,7 +253,7 @@ const ViewTimesheet = () => {
       selectedRows.map(async(item, index) => {
         if(item == combinedRow[index].id) {
           const queryString = `?userId=${combinedRow[index].userId}&startDate=${selectedstartDate}&endDate=${selectedendDate}&description=${combinedRow[index].desc}`;
-          const response = await axios.post(`http://localhost:8080/Timesheet/DaywiseTimesheet/rejected${queryString}`)
+          const response = await axios.post(`${API_BASE_URL}/DaywiseTimesheet/rejected${queryString}`)
           console.log(response)
         }
     })

@@ -21,6 +21,7 @@ import { AuthContext } from "../../App";
 import axios from "axios";
 import SimpleSnackbar from "../Snackbar";
 import { mockprojectData } from "../../data/mockData";
+import API_BASE_URL from "../../apiConfig";
 
 const WeekWiseTimeentries = () => {
   const theme = useTheme();
@@ -204,7 +205,7 @@ const WeekWiseTimeentries = () => {
     const getProjects = async () => {
         try {
             // First API call
-            const response1 = await axios.get(`http://localhost:8080/Timesheet/ProjectEmployee/user/${user.userId}`);
+            const response1 = await axios.get(`${API_BASE_URL}/ProjectEmployee/user/${user.userId}`);
             console.log(response1);
             const projects1 = response1.data.map((item) => ({
                 empID: item.empID,
@@ -212,7 +213,7 @@ const WeekWiseTimeentries = () => {
             }))
 
             // Second API call
-            /*const response2 = await axios.get(`http://localhost:8080/Timesheet/Project/applicable?applicable=true`);
+            /*const response2 = await axios.get(`${API_BASE_URL}/Project/applicable?applicable=true`);
             console.log(response2);
             const projects2 = response2.data.map((item) => ({
                 empID: item.projectId,
@@ -236,7 +237,7 @@ const WeekWiseTimeentries = () => {
     const getData = async () => {
       const queryString = `?userId=${user.userId}&startdate=${CurrentStartDate}&enddate=${CurrentEndDate}`;
       try {
-        const response = await axios.get(`http://localhost:8080/Timesheet/EmployeeTimeentries/Customdate${queryString}`);
+        const response = await axios.get(`${API_BASE_URL}/EmployeeTimeentries/Customdate${queryString}`);
         console.log(response)
         setfetchTimeEntries(response.data)
       } catch(error) {
@@ -269,7 +270,7 @@ const WeekWiseTimeentries = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:8080/Timesheet/EmployeeTimeentries/EmployeeUserProjectCreate",
+        `${API_BASE_URL}/EmployeeTimeentries/EmployeeUserProjectCreate`,
         projects
       );
       console.log(response);
