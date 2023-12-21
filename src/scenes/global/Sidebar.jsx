@@ -11,7 +11,6 @@ import CalendarTodayOutlinedIcon from "@mui/icons-material/CalendarTodayOutlined
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
 import { ApprovalOutlined, ArticleOutlined, ManageAccounts, ViewAgendaOutlined } from "@mui/icons-material";
 import { AuthContext } from "../../App";
-import { getRoutesByRole } from "../../utils/sidebarRouteUtil";
 
 
 const Item = ({ title, to, icon, selected, setSelected }) => {
@@ -23,7 +22,8 @@ const Item = ({ title, to, icon, selected, setSelected }) => {
       style={{
         color: colors.grey[100],
       }}
-      onClick={() => setSelected(title)}
+      onClick={() => {setSelected(title);   sessionStorage.setItem('currentPage', to);
+    }}
       icon={icon}
     >
       <Typography>{title}</Typography>
@@ -38,7 +38,6 @@ const Sidebar = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [selected, setSelected] = useState("Dashboard");
   const {user} = useContext(AuthContext)
-  const userRoutes = getRoutesByRole(user.role);
 
   return (
     <Box
@@ -90,28 +89,28 @@ const Sidebar = () => {
           <Box paddingLeft={isCollapsed ? undefined : "10%"}>
             <Item
               title="Dashboard"
-              to={userRoutes.dashboard}
+              to={'/u/dashboard'}
               icon={<HomeOutlinedIcon />}
               selected={selected}
               setSelected={setSelected}
             />
             <Item
               title="TimeSheet"
-              to={userRoutes.timeentries}
+              to={'/u/timeentries'}
               icon={<PersonOutlinedIcon />}
               selected={selected}
               setSelected={setSelected}
             />
             <Item
               title="View TimeSheet"
-              to={userRoutes.viewtimesheet}
+              to={'/u/viewtimesheet'}
               icon={<ViewAgendaOutlined/>}
               selected={selected}
               setSelected={setSelected}
             />
             <Item
-              title="Calendar"
-              to={userRoutes.calendar}
+              title="SamplePage"
+              to={'/u/samplepage'}
               icon={<CalendarTodayOutlinedIcon />}
               selected={selected}
               setSelected={setSelected}
@@ -119,7 +118,7 @@ const Sidebar = () => {
             {user.role=='Manager' &&
              <Item
               title="Timesheet Reports"
-              to={userRoutes.timesheetreports}
+              to={'/u/timesheetreports'}
               icon={<ArticleOutlined/>}
               selected={selected}
               setSelected={setSelected}
@@ -127,7 +126,7 @@ const Sidebar = () => {
             {user.role=='Manager' &&
              <Item
               title="Approvals"
-              to={userRoutes.approvals}
+              to={'/u/approvals'}
               icon={<ApprovalOutlined/>}
               selected={selected}
               setSelected={setSelected}

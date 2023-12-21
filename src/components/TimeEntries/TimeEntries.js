@@ -12,7 +12,7 @@ const TimeEntries = () => {
   /*useEffect(() => {
     const getFlag = async()=>{
       try{
-        const response = await axios.get(`https://springboot-timesheet-azure.azurewebsites.net/Timesheet/Flagcheck`)
+        const response = await axios.get(`http://localhost:8080/Timesheet/Flagcheck`)
         console.log(response.data[0].timesheetType)
         //settoggleView(response.data)
       } catch(error) {

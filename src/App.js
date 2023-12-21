@@ -3,20 +3,18 @@ import '../src/index.css'
 import TimeEntries from './components/TimeEntries/TimeEntries';
 import { ColorModeContext, useMode } from './themes';
 import { CssBaseline, ThemeProvider } from '@mui/material';
-import Topbar from './scenes/global/Topbar'
-import SideBar from './scenes/global/Sidebar'
 import Dashboard from './scenes/dashboard/index'
-import { Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes, useNavigate } from 'react-router-dom';
 import React, { createContext, useState, useEffect } from 'react';
 import LoginForm from './components/LoginForm';
-import Employee from './scenes/employee/Employee';
-import Manager from './scenes/manager/Manager';
 import ViewTimesheet from './components/ViewTimesheet/ViewTimesheet';
 import Approval from './components/Approvals/Approval';
 import ViewSubmitted from './components/TimeEntries/ViewSubmitted';
-import Samplepage from './components/Calendar/Samplepage';
+import Samplepage from './components/Samplepage/Samplepage';
 import TimesheetReports from './components/TimesheetReports/TimesheetReports';
 import PdfGeneration from './components/TimesheetReports/PdfGeneration';
+import Userpage from './scenes/userpage/Userpage';
+import Forgotpassword from './scenes/global/Forgotpassword';
 
 export const AuthContext = createContext();
 
@@ -24,12 +22,15 @@ function App() {
   const [theme, colorMode] = useMode();
   const [isSidebar, setIsSidebar] = useState(true);
   const [user, setUser] = useState(JSON.parse(localStorage.getItem('userData')) || null);
+  const navigate = useNavigate(); // Import useNavigate from react-router-dom
 
   // Function to set the user when logged in
   const login = (userData) => {
-    setUser(userData);
+    const userDataWithTimestamp = { ...userData, loginTime: Date.now() };
+    setUser(userDataWithTimestamp);
+    
     // Store user data in localStorage
-    localStorage.setItem('userData', JSON.stringify(userData));
+    localStorage.setItem('userData', JSON.stringify(userDataWithTimestamp));
   };
 
   // Function to log out and clear the user data
@@ -37,43 +38,114 @@ function App() {
     setUser(null);
     // Remove user data from localStorage
     localStorage.removeItem('userData');
+    sessionStorage.removeItem('currentPage');
   };
 
+
   useEffect(() => {
-    // Check if user data exists in localStorage and restore the user's session
-    const userData = JSON.parse(localStorage.getItem('userData'));
+    const userData = JSON.parse(localStorage.getItem("userData"));
+
     if (userData) {
-      setUser(userData);
+      const { loginTime } = userData;
+      const expirationTime = loginTime + 70 * 60 * 60 * 1000; // 70 hours in milliseconds
+
+      if (Date.now() < expirationTime) {
+        // If user data is not expired, set the user and navigate to the dashboard
+        setUser(userData);
+
+        // Check if there's any stored page information
+        /*const storedPage = sessionStorage.getItem("currentPage");
+        if (storedPage) {
+          // If there's a stored page, navigate to that page and clear the storage
+          navigate(storedPage);
+          //sessionStorage.removeItem('currentPage');
+        } else {
+          // If no stored page, navigate to the dashboard
+          navigate("/u/dashboard");
+        }*/
+
+        navigate("/u/dashboard");
+
+      } else {
+        // If user data is expired, clear user data and navigate to login
+        logout();
+        navigate("/login");
+        
+      }
+    } else {
+      // If user data doesn't exist, navigate to the login page
+      navigate("/login");
     }
-  }, []);
+  }, [setUser]);
+
+  const ProtectedRoute = ({ element, allowedRoles }) => {
+
+    if (user && allowedRoles.includes(user.role)) {
+      return element;
+    } else {
+      // Redirect to dashboard if user is not authorized
+      return <Navigate to="/u/dashboard" />;
+    }
+  };
 
   return (
-  <ColorModeContext.Provider value={colorMode}>
-    <ThemeProvider theme={theme}>
-      <CssBaseline/>
-      <AuthContext.Provider value={{ user, login, logout }}>
-            <Routes>
-              <Route path='/' element={<LoginForm/>}/>
-              <Route path='e' element={<Employee/>}>
-                <Route index element={<Dashboard/>}/>
-                <Route path='timeentries' element={<TimeEntries/>}/>
-                <Route path='viewtimesheet' element={<ViewTimesheet/>}/>
-                <Route path='viewsubmitted' element={<ViewSubmitted/>}/>
-                <Route path='calendar' element={<Samplepage/>}/>
-              </Route>
-              <Route path='m' element={<Manager/>}>
-                <Route index element={<Dashboard/>}/>
-                <Route path='timeentries' element={<TimeEntries/>}/>
-                <Route path='viewtimesheet' element={<ViewTimesheet/>}/>
-                <Route path='approvals' element={<Approval/>}/>
-                <Route path='calendar' element={<Samplepage/>}/>
-                <Route path='timesheetreports' element={<TimesheetReports/>}/>
-              </Route>
-              <Route path='/generateReport' element={<PdfGeneration/>}/>
-            </Routes>
-      </AuthContext.Provider>
-    </ThemeProvider>
-  </ColorModeContext.Provider>
+    <ColorModeContext.Provider value={colorMode}>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <AuthContext.Provider value={{ user, login, logout }}>
+          <Routes>
+          {user ? (
+              <>
+              <Route path="/u" element={<Userpage/>}>
+                <Route path="dashboard" element={<Dashboard />} />
+                <Route path="timeentries" element={<TimeEntries />} />
+                <Route path="viewtimesheet" element={<ViewTimesheet />} />
+                <Route path="viewsubmitted" element={<ViewSubmitted />} />
+                <Route
+                  path="approvals"
+                  element={
+                    <ProtectedRoute
+                      element={<Approval />}
+                      allowedRoles={["Admin", "Manager"]}
+                    />
+                  }
+                />
+                <Route
+                  path="timesheetreports"
+                  element={
+                    <ProtectedRoute
+                      element={<TimesheetReports />}
+                      allowedRoles={["Admin", "Manager"]}
+                    />
+                  }
+                />
+                <Route path="samplepage" element={<Samplepage />} />
+            </Route>
+            <Route path="/u/*" element={<Navigate to='/u/dashboard'/>} />
+            <Route
+              path="/generateReport"
+              element={
+                <ProtectedRoute
+                  element={<PdfGeneration />}
+                  allowedRoles={["Admin", "Manager"]}
+                />
+              }
+            />
+            </>
+          ) : (
+            <>
+             <Route path="/login" element={<LoginForm />} />
+            
+            <Route path="*" element={<Navigate to="/login" />} />
+
+            <Route path="/forgotpass" element={<Forgotpassword/>}/>
+            </>
+          )}
+           
+          </Routes>
+        </AuthContext.Provider>
+      </ThemeProvider>
+    </ColorModeContext.Provider>
   );
 }
 

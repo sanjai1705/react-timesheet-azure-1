@@ -46,7 +46,7 @@ export default function FormDialog({ dayWiseTimeEntries }) {
       const queryString = `?userId=${sentData[0].user.userId}&startdate=${startDate}&enddate=${endDate}`;
       
       const fetchData = async() => {
-        const response = await axios.get(`https://springboot-timesheet-azure.azurewebsites.net/Timesheet/EmployeeTimeentries/Customdate${queryString}`);
+        const response = await axios.get(`http://localhost:8080/Timesheet/EmployeeTimeentries/Customdate${queryString}`);
         console.log(response)
         const groupedByDate = {};
 

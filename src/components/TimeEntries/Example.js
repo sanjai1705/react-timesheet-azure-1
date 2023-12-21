@@ -3,11 +3,13 @@ import { AuthContext } from '../../App';
 import { tokens } from '../../themes';
 import axios from 'axios';
 import { useTheme } from '@emotion/react';
-import { Button, ButtonGroup, Menu, Typography } from '@mui/material';
-import {  ArrowBackIosSharp, ArrowDropDown, ArrowForwardIosTwoTone, DeleteTwoTone, Done, EditTwoTone } from '@mui/icons-material';
+import { Button, ButtonGroup, Divider, Menu, Typography } from '@mui/material';
+import {  AddCircle, ArrowBackIosSharp, ArrowDropDown, ArrowForwardIosTwoTone, DeleteTwoTone, Done, EditTwoTone } from '@mui/icons-material';
 import { CalendarIcon } from '@mui/x-date-pickers';
 import WeekPicker from '../WeekPicker';
 import { mockTimeEntries, mockprojectData } from '../../data/mockData';
+import NameMenuButton from '../../scenes/global/NameMenuButton';
+import API_BASE_URL from '../../apiConfig';
 
 const Example = () => {
   const { user } = useContext(AuthContext);
@@ -47,6 +49,7 @@ const Example = () => {
   useEffect(() => {
     if(CurrentStartDate != undefined) {
       getPrevProjectTimeEntries(selectedProject, new Date(CurrentStartDate).toLocaleDateString('en-CA'), new Date(CurrentEndDate).toLocaleDateString('en-CA'))
+      console.log('hii')
     }
   }, [CurrentStartDate])
 
@@ -58,15 +61,14 @@ const Example = () => {
     const queryString = `?projectEmployeeId=${empId}&userId=${user.userId}&startDate=${startDate}&endDate=${endDate}`
     console.log(queryString)
     try {
-      const response = await axios.get(`https://springboot-timesheet-azure.azurewebsites.net/Timesheet/customdate${queryString}`);
+      const response = await axios.get(`${API_BASE_URL}/customdate${queryString}`);
       console.log(response)
       const newArray = []
       while (startDate <= endDate) {
-        setdateRange(prevdata => [...prevdata, startDate]);
-        const existingEntry = response.data?.find(entry => entry.date === startDate);
-        if (existingEntry) {
-          // Use the existing entry
-          newArray.push(existingEntry);
+        const existingEntries = response.data?.filter(entry => entry.date === startDate);
+        if (existingEntries && existingEntries.length > 0) {
+          // Use all existing entries
+          newArray.push(...existingEntries);
         } else {
           // Create a new entry
           newArray.push({
@@ -81,13 +83,12 @@ const Example = () => {
             task: ""
           });
         }
+      
         let dateObject = new Date(startDate);
         dateObject.setDate(dateObject.getDate() + 1);
-
+      
         // Use toLocaleDateString to get the updated date in "yyyy-mm-dd" format
-        let updatedDate = dateObject.toLocaleDateString('en-CA');
-        startDate = updatedDate
-        console.log(startDate)
+        startDate = dateObject.toLocaleDateString('en-CA');
       }
       setfetchProjectTimeEntries(newArray)
 
@@ -100,8 +101,11 @@ const Example = () => {
     const queryString = `?userId=${user.userId}&startdate=${startDate}&enddate=${endDate}`;
     console.log(queryString)
     try {
-      const response = await axios.get(`https://springboot-timesheet-azure.azurewebsites.net/Timesheet/EmployeeTimeentries/Customdate${queryString}`);
+      const response = await axios.get(`${API_BASE_URL}/EmployeeTimeentries/Customdate${queryString}`);
       console.log(response)
+      response.data.sort((a, b) => {
+        return new Date(a.date) - new Date(b.date);
+      });
       const groupedByDate = response.data.reduce((acc, entry) => {
         const date = entry.date;
         if (!acc[date]) {
@@ -123,7 +127,7 @@ const Example = () => {
   const getProjects = async () => {
     try {
       // First API call
-      const response1 = await axios.get(`https://springboot-timesheet-azure.azurewebsites.net/Timesheet/ProjectEmployee/user/${user.userId}`);
+      const response1 = await axios.get(`${API_BASE_URL}/ProjectEmployee/user/${user.userId}`);
       console.log(response1);
       const projects1 = response1.data.map((item) => ({
         empID: item.empID,
@@ -145,7 +149,7 @@ const Example = () => {
       handleWeekPickerChange(new Date().toString())
       await getPrevProjectTimeEntries(projects1[0].empID, startdate.toLocaleDateString('en-CA'), enddate.toLocaleDateString('en-CA'))
       // Second API call
-      /*const response2 = await axios.get(`https://springboot-timesheet-azure.azurewebsites.net/Timesheet/Project/applicable?applicable=true`);
+      /*const response2 = await axios.get(`${API_BASE_URL}/Project/applicable?applicable=true`);
       console.log(response2);
       const projects2 = response2.data.map((item) => ({
           empID: item.projectId,
@@ -212,7 +216,19 @@ const Example = () => {
       const newArray = [...fetchProjectTimeEntries];
       newArray.splice(index, 1, {
         user: { userId: user.userId },
-        date: new Date(CurrentStartDate).toLocaleDateString('en-CA'),
+        date: newArray[index].date,
+        projectEmployee: { empID: selectedProject },
+        minutes: "",
+        task: "",
+      });
+      setfetchProjectTimeEntries(newArray);
+    }
+
+    else if(action === 'add') {
+      const newArray = [...fetchProjectTimeEntries];
+      newArray.splice(index+1, 0, {
+        user: { userId: user.userId },
+        date: newArray[index].date,
         projectEmployee: { empID: selectedProject },
         minutes: "",
         task: "",
@@ -225,7 +241,7 @@ const Example = () => {
     const queryString = `?userId=${user.userId}&startdate=${CurrentStartDate.toLocaleDateString('en-CA')}&enddate=${CurrentEndDate.toLocaleDateString('en-CA')}`;
     console.log(queryString)
     try {
-      const response = await axios.post(`https://springboot-timesheet-azure.azurewebsites.net/Timesheet/DaywiseTimesheet/submit${queryString}`)
+      const response = await axios.post(`${API_BASE_URL}/DaywiseTimesheet/submit${queryString}`)
       console.log(response)
     } catch (error) {
       console.log('Error while changing status:', error)
@@ -233,13 +249,11 @@ const Example = () => {
   }
 
   const handleSave = async () => {
-    
-    
     const newEntry = fetchProjectTimeEntries.filter(item => !item.timesheetId && item.minutes != "")
     console.log(newEntry)
     try {
       const response = await axios.post(
-        "https://springboot-timesheet-azure.azurewebsites.net/Timesheet/EmployeeTimeentries/EmployeeUserProjectCreate1",
+        "${API_BASE_URL}/EmployeeTimeentries/EmployeeUserProjectCreate1",
         newEntry
       );
       console.log(response);
@@ -261,7 +275,7 @@ const Example = () => {
   const handleDoneClick = async () => {
     editableArray.minutes = editableArray.minutes * 60
     try {
-      const response = await axios.put(`https://springboot-timesheet-azure.azurewebsites.net/Timesheet/EmployeeTimeentries/Update/${editableArray.timesheetId}`, editableArray)
+      const response = await axios.put(`${API_BASE_URL}/EmployeeTimeentries/Update/${editableArray.timesheetId}`, editableArray)
       console.log(response)
     } catch (error) {
       console.log("Error while updating", error);
@@ -270,15 +284,18 @@ const Example = () => {
     seteditableIndex()
 
     getPrevTimeEntries(CurrentStartDate.toLocaleDateString('en-CA'), CurrentEndDate.toLocaleDateString('en-CA'))
-    getPrevProjectTimeEntries(selectedProject, CurrentStartDate.toLocaleDateString('en-CA'), CurrentEndDate.toLocaleDateString('en-CA'))
   };
 
   console.log(fetchTimeEntries)
+  console.log(fetchProjectTimeEntries)
 
   return (
-    <div className="w-10/12 mx-auto mt-5 flex flex-col gap-4">
+    <div className="w-11/12 mx-auto mt-5 flex flex-col gap-4">
+      <div className='flex justify-between align-top'>
       <Typography variant='h2'>Timesheet</Typography>
-      <div className='flex flex-col gap-2'>
+      <NameMenuButton/>
+      </div>
+      <div className='w-10/12 mx-auto flex flex-col gap-2'>
         <div className='flex justify-between items-center'>
           <div className='flex flex-row gap-1'>
             <ButtonGroup
@@ -330,19 +347,19 @@ const Example = () => {
 
         <form>
           <div className="overflow-x-auto">
-            <table className="w-11/12 mx-auto my-0 rounded-lg shadow-md overflow-hidden">
+            <table className="mx-auto my-0 rounded-lg shadow-md overflow-hidden">
               <thead>
                 <tr className="text-xs text-left text-gray-300 bg-gray-700 border-b uppercase">
-                  <th className="p-3">Date</th>
-                  <th className="p-3">Hours</th>
-                  <th className="p-3">Task</th>
-                  <th className="p-1"></th>
+                  <th className="p-2">Date</th>
+                  <th className="p-2">Hours</th>
+                  <th className="p-2">Task</th>
+                  <th className="p-1">Actions</th>
                 </tr>
               </thead>
 
               <tbody>
                 {fetchProjectTimeEntries?.map((item, index) => (
-                  <tr key={index} className={editableIndex !== index ? "p-1 border-b bg-white" : "p-1 border-b bg-blue-300"}>
+                  <tr key={index} className={editableIndex !== index ? "p-2 border-b bg-white" : "p-2 border-b bg-blue-300"}>
                     <td className="w-1/12">
                       <input
                         readOnly
@@ -350,15 +367,15 @@ const Example = () => {
                         type="date"
                         max={new Date().toISOString().split("T")[0]}
                         value={item.date}
-                        className="w-full p-1.5 bg-slate-100 border border-transparent rounded-md focus:outline-none focus:border-gray-200 focus:bg-slate-200"
+                        className="w-full  bg-slate-100 border border-transparent rounded-md focus:outline-none focus:border-gray-200 focus:bg-slate-200"
                       ></input>
                     </td>
-                    <td className="w-2/12">
+                    <td className="w-1/12">
                       <input
                         disabled={item.timesheetId && editableIndex != index}
                         type="text"
-                        placeholder="Enter hours"
-                        className="w-full p-2 bg-slate-100 border border-transparent rounded-md focus:outline-none focus:border-gray-200 focus:bg-slate-200"
+                        placeholder="Hours"
+                        className="w-full bg-slate-100 border border-transparent rounded-md focus:outline-none focus:border-gray-200 focus:bg-slate-200"
                         value={
                           editableIndex !== index
                             ? (item.timesheetId ? item.minutes / 60 : item.minutes)
@@ -372,6 +389,7 @@ const Example = () => {
                     </td>
                     <td className="w-9/12">
                       <input
+                        required
                         disabled={item.timesheetId && editableIndex != index}
                         placeholder="Task"
                         value={
@@ -380,28 +398,59 @@ const Example = () => {
                         onChange={(e) =>
                           handleFieldChange(index, "task", e.target.value)
                         }
-                        className="w-full p-2 bg-slate-100 border border-transparent rounded-md focus:outline-none focus:border-gray-200 focus:bg-slate-200"
+                        className="w-full bg-slate-100 border border-transparent rounded-md focus:outline-none focus:border-gray-200 focus:bg-slate-200"
                       ></input>
                     </td>
                     <td className="w-1/12">
                       <div className="flex justify-center gap-3">
                         {!item.timesheetId ? (
-                          <button
+                          <div>
+                              <button
                             type="button"
-                            className="bg-transparent p-1 rounded-full hover:bg-slate-100"
+                            className="bg-transparent rounded-full hover:bg-slate-100"
                             onClick={() => handleEntryArrayChange("remove", index)}
                           >
                             <DeleteTwoTone color="error" />
                           </button>
+
+                          {(item.minutes && item.task) && 
+                          <button
+                          type="button"
+                          className="bg-transparent rounded-full hover:bg-slate-100"
+                          onClick={() => handleEntryArrayChange("add", index)}
+                        >
+                          <AddCircle color="info" />
+                        </button>
+                          }
+                          </div>
+                          
                         ) : (
                           editableIndex === index ? (
                             <button type="button" onClick={handleDoneClick}>
                               <Done />
                             </button>
                           ) : (
-                            <button type="button" onClick={() => handleEditClick(index)}>
+                            <div className='flex'>
+                            
+                            <button type="button" className="bg-transparent rounded-full hover:bg-slate-100"
+                             onClick={() => handleEditClick(index)}>
                               <EditTwoTone />
                             </button>
+                            <button
+                            type="button"
+                            className="bg-transparent rounded-full hover:bg-slate-100"
+                            onClick={() => handleEntryArrayChange("remove", index)}
+                          >
+                            <DeleteTwoTone color="error" />
+                          </button>
+                          <button
+                          type="button"
+                          className="bg-transparent rounded-full hover:bg-slate-100"
+                          onClick={() => handleEntryArrayChange("add", index)}
+                        >
+                          <AddCircle color="info" />
+                        </button>
+                            </div>
                           )
                         )
                         }
@@ -416,7 +465,7 @@ const Example = () => {
 
       
 
-      <div className="w-4/5 mx-auto p-2 flex justify-end gap-2">
+      <div className="p-2 flex justify-end gap-2">
         <button
           className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none"
           onClick={() => handleSave()}
@@ -430,19 +479,20 @@ const Example = () => {
 
 
 
+    <Divider/>
 
 
 
-
-      <div className="container mx-auto">
-      <Typography variant='h2'>View Saved</Typography>
-        <table className="min-w-full bg-white border border-gray-300">
-          <thead>
+      <div className="container mx-auto flex flex-col gap-3">
+        <Typography variant='h2'>View Saved</Typography>
+        <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+        <table className="w-10/12 mx-auto bg-white border border-gray-300">
+          <thead className='bg-white'>
             <tr>
-              <th className="py-2 px-4 border-b text-left">Date</th>
-              <th className="py-2 px-4 border-b text-left">Project</th>
-              <th className="py-2 px-4 border-b text-left">Hours</th>
-              <th className="py-2 px-4 border-b text-left w-1/2">Task</th>
+              <th className="py-1 px-2 border-b text-left bg-white sticky top-0 z-10">Date</th>
+              <th className="py-1 px-2 border-b text-left bg-white sticky top-0 z-10">Project</th>
+              <th className="py-1 px-2 border-b text-left bg-white sticky top-0 z-10">Hours</th>
+              <th className="w-7/12 py-1 px-2 border-b text-left bg-white sticky top-0 z-10">Task</th>
             </tr>
           </thead>
           <tbody>
@@ -452,16 +502,16 @@ const Example = () => {
                   <React.Fragment key={taskIndex}>
                     {taskIndex === 0 || task.date !== dayTasks[taskIndex - 1].date ? (
                       <tr className="bg-blue-100">
-                        <td colSpan="4" className="py-2 px-4 border-b font-bold text-blue-700">
+                        <td colSpan="4" className="border-b font-bold text-blue-700">
                           {task.date}
                         </td>
                       </tr>
                     ) : null}
-                    <tr className={taskIndex % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
-                      <td className="py-2 px-4 border-b">{task.date}</td>
-                      <td className="py-2 px-4 border-b">{task.projectEmployee.empID + ' - ' + task.projectEmployee.project.projectName}</td>
-                      <td className="py-2 px-4 border-b">{task.minutes/60}</td>
-                      <td className="py-2 px-4 border-b">{task.task}</td>
+                    <tr className={taskIndex % 2 === 0 ? 'bg-gray-100' : 'bg-gray-100'}>
+                      <td className="py-1 px-2 border-b">{task.date}</td>
+                      <td className="py-1 px-2 border-b">{task.projectEmployee.empID + ' - ' + task.projectEmployee.project.projectName}</td>
+                      <td className="py-1 px-2 border-b">{task.minutes/60}</td>
+                      <td className="py-1 px-2 border-b">{task.task}</td>
                     </tr>
                   </React.Fragment>
                 ))}
@@ -469,10 +519,14 @@ const Example = () => {
             ))}
           </tbody>
         </table>
-        <button className="bg-green-500 float-right mt-5 text-white px-4 py-2 rounded-md hover:bg-green-600 focus:outline-none"
-          onClick={() => handleStatusSubmit()}>
-          Submit Timesheet
-        </button>
+        </div>
+        <div className="w-10/12 mx-auto flex justify-end">
+          <button className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 focus:outline-none"
+            onClick={() => handleStatusSubmit()}>
+            Submit Timesheet
+          </button>
+        </div>
+       
       </div>
 
     </div>

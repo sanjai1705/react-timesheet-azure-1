@@ -6,7 +6,7 @@ import { LightModeOutlined, DarkModeOutlined, NotificationsOutlined,
          SettingsOutlined, PersonOutline, Search, PersonOutlined, LogoutOutlined, ArrowDropDown} from '@mui/icons-material'
 import { AuthContext } from '../../App'
 import { mockDataTeam } from '../../data/mockData'
-import { Navigate, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 
 const Topbar = () => {
   const {user, logout} = useContext(AuthContext)
