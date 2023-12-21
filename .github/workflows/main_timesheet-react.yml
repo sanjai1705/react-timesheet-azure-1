@@ -25,7 +25,6 @@ jobs:
         run: |
           npm install
           npm install react-pro-sidebar@0.7.1
-
       - name: Build React app with warnings allowed
         run: npm run build
         env:
@@ -62,5 +61,5 @@ jobs:
         with:
           app-name: 'timesheet-react'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_51519D1C1ED94DE5BC49E2A045E6C93B }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_3841364BC8C84C1DB56437CA2A4D16D9 }}
           package: release.zip
