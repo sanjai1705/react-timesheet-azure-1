@@ -15,6 +15,7 @@ import TimesheetReports from './components/TimesheetReports/TimesheetReports';
 import PdfGeneration from './components/TimesheetReports/PdfGeneration';
 import Userpage from './scenes/userpage/Userpage';
 import Forgotpassword from './scenes/global/Forgotpassword';
+import ResetPassword from './scenes/global/Resetpassword';
 
 export const AuthContext = createContext();
 
@@ -42,7 +43,7 @@ function App() {
   };
 
 
-  useEffect(() => {
+  /*useEffect(() => {
     const userData = JSON.parse(localStorage.getItem("userData"));
 
     if (userData) {
@@ -61,10 +62,10 @@ function App() {
           //sessionStorage.removeItem('currentPage');
         } else {
           // If no stored page, navigate to the dashboard
-          navigate("/u/dashboard");
-        }*/
+          navigate("/u/profile");
+        }
 
-        navigate("/u/dashboard");
+        navigate("/u/timeentries");
 
       } else {
         // If user data is expired, clear user data and navigate to login
@@ -72,10 +73,40 @@ function App() {
         navigate("/login");
         
       }
-    } else {
+    } else if ((!window.location.pathname.startsWith("/reset")) && (!window.location.pathname.startsWith("/forgotpass"))) {
       // If user data doesn't exist, navigate to the login page
       navigate("/login");
     }
+  }, [setUser]); */
+
+
+  useEffect(() => {
+    const userData = JSON.parse(localStorage.getItem("userData"));
+    if(userData == null) {
+      if ((!window.location.pathname.startsWith("/reset")) && (!window.location.pathname.startsWith("/forgotpass"))) {
+        navigate("/login");
+      }
+    } else {
+      const { loginTime } = userData;
+      const expirationTime = loginTime + 70 * 60 * 60 * 1000; // 1/10 hours in milliseconds
+
+      if (Date.now() > expirationTime) {
+        logout();
+        navigate("/login"); 
+      }
+      else {
+        const storedPage = sessionStorage.getItem("currentPage")
+        if (storedPage) {
+          // If there's a stored page, navigate to that page and clear the storage
+          navigate(storedPage);
+          //sessionStorage.removeItem('currentPage');
+        } else {
+          // If no stored page, navigate to the dashboard
+          navigate("/u/timeentries");
+        }
+      }
+    }
+
   }, [setUser]);
 
   const ProtectedRoute = ({ element, allowedRoles }) => {
@@ -84,7 +115,7 @@ function App() {
       return element;
     } else {
       // Redirect to dashboard if user is not authorized
-      return <Navigate to="/u/dashboard" />;
+      return <Navigate to="/u/profile" />;
     }
   };
 
@@ -97,7 +128,7 @@ function App() {
           {user ? (
               <>
               <Route path="/u" element={<Userpage/>}>
-                <Route path="dashboard" element={<Dashboard />} />
+                <Route path="profile" element={<Dashboard />} onleave/>
                 <Route path="timeentries" element={<TimeEntries />} />
                 <Route path="viewtimesheet" element={<ViewTimesheet />} />
                 <Route path="viewsubmitted" element={<ViewSubmitted />} />
@@ -121,7 +152,7 @@ function App() {
                 />
                 <Route path="samplepage" element={<Samplepage />} />
             </Route>
-            <Route path="/u/*" element={<Navigate to='/u/dashboard'/>} />
+            <Route path="/u/*" element={<Navigate to='/u/profile'/>} />
             <Route
               path="/generateReport"
               element={
@@ -139,6 +170,8 @@ function App() {
             <Route path="*" element={<Navigate to="/login" />} />
 
             <Route path="/forgotpass" element={<Forgotpassword/>}/>
+
+            <Route path="/reset" element={<ResetPassword/>} />
             </>
           )}
            

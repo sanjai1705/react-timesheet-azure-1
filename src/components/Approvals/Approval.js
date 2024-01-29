@@ -451,8 +451,8 @@ export default Approval;*/
 import axios from "axios";
 import { useContext, useState, useEffect } from "react";
 import { AuthContext } from "../../App";
-import { PlaylistRemove } from "@mui/icons-material";
-import { Typography } from "@mui/material";
+import { ArrowBackIosSharp, ArrowDropDown, ArrowForwardIosTwoTone, PlaylistRemove } from "@mui/icons-material";
+import { ButtonGroup, Menu, Typography, useTheme } from "@mui/material";
 import Close from "@mui/icons-material/Close";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
@@ -461,18 +461,66 @@ import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import API_BASE_URL from "../../apiConfig";
+import NameMenuButton from "../../scenes/global/NameMenuButton";
+import { CalendarIcon } from "@mui/x-date-pickers";
+import WeekPicker from "../WeekPicker";
+import { tokens } from "../../themes";
+import SimpleSnackbar from "../Snackbar";
+import Loader from "../Loader";
 
 const Approval = () => {
   const { user } = useContext(AuthContext);
   const [fetchManEmpInfo, setfetchManEmpInfo] = useState(null);
   const [fetchEmpTimeEntries, setfetchEmpTimeEntries] = useState([]);
+  const [fetchAllProjects, setfetchAllProjects] = useState([]);
   const [projectNames, setProjectNames] = useState([]);
   const [userNames, setUserNames] = useState([]);
+  const theme = useTheme();
+  const colors = tokens(theme.palette.mode);
+  const [loading, setLoading] = useState(true);
   const [dates, setDates] = useState([]);
+  const [alerttrigger, setalerttrigger] = useState("");
   const [selectedRows, setSelectedRows] = useState([]);
   const [rejectionReasons, setRejectionReasons] = useState([]);
   const [selectedReason, setSelectedReason] = useState("");
   const [selectedReasonOption, setSelectedReasonOption] = useState("new");
+  const [filteredData, setFilteredData] = useState([]);
+
+  const [anchorEl, setAnchorEl] = useState(null);
+  const open = Boolean(anchorEl);
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleWeekPickerChange = (newValue) => {
+    const currentDate = new Date(newValue);
+    const startdate = new Date(currentDate);
+    startdate.setDate(startdate.getDate() - startdate.getDay()); // Start of the week (Sunday)
+
+    const enddate = new Date(startdate);
+    enddate.setDate(enddate.getDate() + 6); // End of the week (Saturday)
+
+    setFilters((prevFilters) => ({ ...prevFilters, startDate: startdate.toDateString(), endDate: enddate.toDateString() }));
+  };
+
+
+  const changeWeek = (direction) => {
+    if (direction == 'prevWeek') {
+      let tempDate = new Date(filters.startDate);
+      tempDate.setDate(tempDate.getDate() - 1);
+      console.log(tempDate)
+      handleWeekPickerChange(tempDate)
+    }
+    else if (direction == 'nextWeek') {
+      let tempDate = new Date(filters.endDate);
+      tempDate.setDate(tempDate.getDate() + 1);
+      console.log(tempDate)
+      handleWeekPickerChange(tempDate)
+    }
+  }
 
   const [filters, setFilters] = useState({
     date: "",
@@ -480,57 +528,92 @@ const Approval = () => {
     status: "",
     projectName: "",
     fullName: "",
+    startDate: "",
+    endDate: ""
   });
 
   const [openDialog, setOpenDialog] = useState(false);
   const [sameReason, setSameReason] = useState("");
 
   useEffect(() => {
+    setLoading(true)
     getManEmpInfo();
   }, []);
 
   useEffect(() => {
-    getDATA();
+    if(fetchManEmpInfo != null) {
+      setLoading(true)
+      getAllProjects();
+      getManEmpTimeentries();
+      setLoading(false)
+    }
   }, [fetchManEmpInfo]);
 
   useEffect(() => {
+    if(fetchAllProjects.length > 0 && fetchEmpTimeEntries.length > 0) {
     // Initialize sets to store unique values
     const uniqueProjectNames = new Set();
     const uniqueUserNames = new Set();
-    const uniqueDates = new Set();
+    //const uniqueDates = new Set();
 
     // Iterate over fetchEmpTimeEntries to extract unique values
-    fetchEmpTimeEntries.forEach((row) => {
-      uniqueProjectNames.add(row.projectEmployee.project.projectName);
-      uniqueUserNames.add(row.user.firstname + " " + row.user.lastname);
-      uniqueDates.add(row.date);
+    fetchManEmpInfo?.forEach((row) => {
+     //uniqueProjectNames.add(row.projectEmployee.project.projectName);
+     if(row.role.roleName === 'Employee') {
+      uniqueUserNames.add(row.firstname + " " + row.lastname);
+     }
+      
+      //uniqueDates.add(row.date);
     });
+
+    fetchAllProjects?.forEach((row) => {
+      uniqueProjectNames.add(row.projectName)
+    })
 
     // Convert sets to arrays and update state
     setProjectNames(Array.from(uniqueProjectNames));
     setUserNames(Array.from(uniqueUserNames));
     // Convert set of dates to array, sort in ascending order, and update state
-    setDates(Array.from(uniqueDates).sort((a, b) => new Date(a) - new Date(b)));
-  }, [fetchEmpTimeEntries]);
+    //setDates(Array.from(uniqueDates).sort((a, b) => new Date(a) - new Date(b)));
+    setLoading(false)
+  }
+  }, [fetchAllProjects, fetchEmpTimeEntries]);
 
   const getManEmpInfo = async () => {
     try {
       const response = await axios.get(
-        `${API_BASE_URL}/EmployeeManager/Manager/${user.userId}`
+        //For now we are fetching all users instead of manager employee mapping
+        `${API_BASE_URL}/Users`
       );
       setfetchManEmpInfo(response.data);
       console.log(response.data);
     } catch (error) {
       console.log(error);
     }
+    setLoading(false)
   };
 
-  const getDATA = async () => {
+  const getAllProjects = async () => {
     try {
-      const fetchData = fetchManEmpInfo?.map(async (item) => {
+      const response = await axios.get(
+        //For now we are fetching all users instead of manager employee mapping
+        `${API_BASE_URL}/Project`
+      );
+      setfetchAllProjects(response.data);
+      console.log(response.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const getManEmpTimeentries = async () => {
+    try {
+      const filteredItems = fetchManEmpInfo?.filter(item => item.role.roleName === 'Employee');
+      const fetchData = filteredItems?.map(async (item) => {
         const response = await axios.get(
-          `${API_BASE_URL}/EmployeeTimeentries/submitted/user/${item.user1.userId}`
+          `${API_BASE_URL}/EmployeeTimeentries/submitted/user/${item.userId}`
         );
+        console.log(response.data)
         return response.data;
       });
       const responseData = await Promise.all(fetchData);
@@ -562,27 +645,47 @@ const Approval = () => {
 
   const getFullName = (user) => `${user.firstname} ${user.lastname}`;
 
-  const filteredData = fetchEmpTimeEntries?.filter((row) => {
-    return Object.keys(filters).every((column) => {
-      const filterValue = filters[column];
-
-      // Handle nested properties and concatenated values
-      let propertyValue;
-
-      if (column === "fullName") {
-        propertyValue = getFullName(row.user);
-      } else if (column === "projectName") {
-        propertyValue = row.projectEmployee.project.projectName;
-      } else {
-        const nestedProperties = column.split(".");
-        propertyValue = nestedProperties.reduce((obj, prop) => obj[prop], row);
-      }
-
-      return String(propertyValue)
-        .toLowerCase()
-        .includes(filterValue.toLowerCase());
-    });
-  });
+  useEffect(() => {
+    if(fetchEmpTimeEntries.length > 0) {
+      const newFilteredData = fetchEmpTimeEntries?.filter((row) => {
+        return Object.keys(filters).every((column) => {
+          const filterValue = filters[column];
+          console.log(row)
+          if (!filterValue) return true;
+  
+          if (column === "startDate") {
+            const rowDate = new Date(row.date).setHours(0, 0, 0, 0);
+            const startDate = new Date(filterValue).setHours(0, 0, 0, 0);
+            return rowDate >= startDate;
+          }
+  
+          if (column === "endDate") {
+            const rowDate = new Date(row.date).setHours(0, 0, 0, 0);
+            const endDate = new Date(filterValue).setHours(0, 0, 0, 0);
+            console.log(rowDate == endDate)
+            return rowDate <= endDate;
+          }
+  
+          let propertyValue;
+          if (column === "fullName") {
+            propertyValue = getFullName(row.user);
+          } else if (column === "projectName") {
+            propertyValue = row.projectEmployee.project.projectName;
+          } else {
+            const nestedProperties = column.split(".");
+            propertyValue = nestedProperties.reduce((obj, prop) => obj && obj[prop], row);
+          }
+  
+          return String(propertyValue).toLowerCase().includes(filterValue.toLowerCase());
+        });
+      });
+  
+      // Update the filtered data state
+      setFilteredData(newFilteredData);
+    } else {
+      setFilteredData(fetchEmpTimeEntries)
+    }
+  }, [filters, fetchEmpTimeEntries]); 
 
   // Function to handle checkbox click in the table header
   const handleHeaderCheckboxChange = (isChecked) => {
@@ -615,6 +718,8 @@ const Approval = () => {
       status: "",
       projectName: "",
       fullName: "",
+      startDate: "",
+      endDate: ""
     });
   };
 
@@ -702,42 +807,69 @@ const Approval = () => {
     }
   };
 
-  const mockRows = [9870, 9871];
 
   const handleApprove = async () => {
-    try {
-      mockRows.map(async (item) => {
-        console.log(item);
-        const response = await axios.post(
-          `${API_BASE_URL}/EmployeeTimeentries/approved?timesheetId=${item}`
-        );
-        console.log(response);
-      });
-    } catch (error) {
-      console.log("Error while approving", error);
+    if(selectedRows.length === filteredData.length) {
+      setLoading(true)
+      try {
+        selectedRows.map(async (item) => {
+          console.log(item);
+          const response = await axios.post(
+            `${API_BASE_URL}/EmployeeTimeentries/approved?timesheetId=${item}`
+          );
+          console.log(response);
+        });
+      } catch (error) {
+        console.log("Error while approving", error);
+      }
+      setLoading(false)
+      setalerttrigger("Approve Status")
+      handleRemoveFilters()
+    } else {
+      setalerttrigger("Rows")
     }
   }
 
+
   const handleReject = async () => {
+    // Check if every selected row has a corresponding rejection reason
+    const allSelectedHaveReasons = selectedRows.every(selectedId =>
+      rejectionReasons.some(reason => reason.timesheetId === selectedId && reason.reason && reason.reason.trim() !== '')
+    );
+
+    if (!allSelectedHaveReasons) {
+      setalerttrigger("Reject Reason")
+      // Optionally, stop the function or show an error message to the user
+      return;
+    }
+    setLoading(true)
+
     try {
       rejectionReasons.map(async (item, index) => {
         if(selectedRows.includes(item.timesheetId)) {
           const response = await axios.post(
-            `https://springboot-timesheet-azure.azurewebsites.net/Timesheet/EmployeeTimeentries/rejected?timesheetId=${item.timesheetId}&rejectionDescription=${item.reason}`)
+            `${API_BASE_URL}/EmployeeTimeentries/rejected?timesheetId=${item.timesheetId}&rejectionDescription=${item.reason}`)
           console.log(response)
           }
       })
     } catch(error) {
       console.log('Error while Rejecting', error)
     }
+
+    setLoading(false)
+    setalerttrigger("Reject Status")
   }
 
   console.log(selectedRows);
   console.log(rejectionReasons);
+  
   return (
-    <div className="container px-10 flex flex-col items-right gap-5 justify-center">
+    <div className="container px-10 flex flex-col mt-5 items-right gap-5 justify-center">
       {/* Add filter inputs */}
-      <Typography variant="h2">Approve Timesheet</Typography>
+      <div className='flex justify-between align-top'>
+      <Typography variant='h2'>Approve Timesheet</Typography>
+      <NameMenuButton/>
+      </div>
       <div className="mb-4 flex items-center space-x-4">
         {/*<select
           className="p-2 bg-slate-200 border border-transparent rounded-md focus:outline-none focus:border-gray-900 focus:bg-white"
@@ -751,7 +883,28 @@ const Approval = () => {
             </option>
           ))}
           </select>*/}
-
+        <div className='flex flex-row items-center gap-1'>     
+          <div className="flex justify-center items-center">
+            <Typography variant="h5">Select Week: </Typography>
+            <div className="w-50 w-fixed p-2 border-2 ring-2 ring-transparent border-gray-200 rounded-lg">
+              {filters.startDate && filters.endDate ? (
+              <p className="italic font-bold"  onClick={handleClick}>
+                {filters.startDate + " - " + filters.endDate}
+              </p>
+            ) : (
+              <p className="text-gray-400" onClick={handleClick}>(Start Date) - (End Date)</p>
+            )}
+              <Menu
+                id="basic-menu"
+                anchorEl={anchorEl}
+                open={open}
+                onClose={handleClose}
+              >
+                <WeekPicker onValueChange={handleWeekPickerChange} />
+              </Menu>
+            </div>
+          </div>     
+          </div>
         <select
           className="p-2 bg-slate-200 border border-transparent rounded-md focus:outline-none focus:border-gray-900 focus:bg-white"
           value={filters.projectName}
@@ -778,41 +931,41 @@ const Approval = () => {
           ))}
         </select>
         <p
-          className="text-red-500 cursor-pointer hover:underline"
+          className="text-red-500 text-xs cursor-pointer hover:underline"
           onClick={handleRemoveFilters}
         >
-          <PlaylistRemove color="warning" />
-          remove filters
+          clear filters
         </p>
       </div>
 
       {/* Table */}
+      <div className="block max-h-[400px] overflow-y-auto">
       <table className="w-full border">
-        <thead>
-          <tr className="bg-slate-500 text-white">
-            <th className="border pl-1">
+        <thead className="sticky top-0 bg-slate-500 py-1">
+          <tr className="text-white">
+            <th className="[5%] border">
               <input
                 type="checkbox"
                 checked={selectedRows.length === filteredData.length}
                 onChange={(e) => handleHeaderCheckboxChange(e.target.checked)}
               />
-              <span className="ml-1">S.No</span>
+              <span>S.No</span>
             </th>
-            <th className="border p-1">Name</th>
-            <th className="border p-1">Date</th>
-            <th className="border p-1">Project</th>
-            <th className="border p-1">Login Time</th>
-            <th className="border p-1">Logout Time</th>
-            <th className="border p-1">Hours</th>
-            <th className="border p-1 w-5/12">Rejection Reason</th>
+            <th className="w-[10%] border">Name</th>
+            <th className="w-[8%] border">Date</th>
+            <th className="w-[15%] border">Project</th>
+            <th className="w-[27%] border">Task</th>
+            <th className="w-[3%] border">Hours</th>
+            <th className="w-[32%] border">Rejection Reason</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody className="overflow-y-auto">
           {filteredData?.map((row, index) => (
             <tr key={index}>
               <td className="border pl-1">
                 <input
                   type="checkbox"
+                  aria-label={`Select row ${row.id}`}
                   checked={selectedRows.includes(row.timesheetId)}
                   onChange={(e) =>
                     handleRowCheckboxChange(row.timesheetId, e.target.checked)
@@ -827,10 +980,9 @@ const Approval = () => {
               <td className="border p-1">
                 {row.projectEmployee.project.projectName}
               </td>
-              <td className="border p-1">{row.login}</td>
-              <td className="border p-1">{row.logout}</td>
-              <td className="border p-1">{row.minutes / 60}</td>
-              <td className="border p-1 w-5/12">
+              <td className="border p-1">{row.task}</td>
+              <td className="border p-1 text-center">{row.minutes / 60}</td>
+              <td className="border p-1">
                 {/* Input field for rejection reason */}
                 <input
                   type="text"
@@ -858,14 +1010,22 @@ const Approval = () => {
             </tr>
           ))}
         </tbody>
-        <tfoot>
-          <tr>
-            <td colSpan="7" className="p-2 border text-left">
+        <tfoot className="bottom-0 sticky border bg-slate-100">
+          <tr className="border">
+            <td colSpan="2" className="p-2 border text-left">
               {selectedRows.length > 0
                 ? `${selectedRows.length} row${
                     selectedRows.length > 1 ? "s" : ""
                   } selected`
                 : ""}
+            </td>
+
+            <td colSpan="3" className="p-2 text-right">
+              Unapproved Hours:
+            </td>
+
+            <td colSpan="1" className="text-center">
+              {filteredData?.reduce((accumulator, currentValue) => accumulator + currentValue.minutes/60, 0)}
             </td>
 
             <td colSpan="1">
@@ -877,7 +1037,8 @@ const Approval = () => {
                 Enter same rejection reason for the selected rows*/}
               <button
                 onClick={handleUseSameReasonForAllChange}
-                className= "bg-red-200 p-2 rounded-sm hover:bg-red-300"
+                className= {(selectedRows.length > 0) ? "bg-red-200 p-1 rounded-sm hover:bg-red-300" : "bg-gray-200 p-1 rounded-sm"}
+                disabled={selectedRows.length <= 0}
               >
                 Enter same rejection reason for the selected rows
               </button>
@@ -958,7 +1119,7 @@ const Approval = () => {
           </tr>
         </tfoot>
       </table>
-
+      </div>
       <div className="mt-4 flex space-x-4">
         <button
           className="p-2 bg-green-500 text-white rounded-md hover:bg-green-600 focus:outline-none focus:border-green-700 focus:ring focus:ring-green-200"
@@ -974,6 +1135,43 @@ const Approval = () => {
           Reject
         </button>
       </div>
+      {alerttrigger == "Rows" && (
+        <SimpleSnackbar
+          message="Please Select all Rows"
+          setalerttrigger={setalerttrigger}
+          vertical={'top'}
+          horizontal={'center'}
+          severity={'error'}
+        />
+      )}
+      {alerttrigger == "Reject Reason" && (
+        <SimpleSnackbar
+          message="Not all Selected Rows have Rejection Reason"
+          setalerttrigger={setalerttrigger}
+          vertical={'top'}
+          horizontal={'center'}
+          severity={'error'}
+        />
+      )}
+      {alerttrigger == "Approve Status" && (
+        <SimpleSnackbar
+          message="Approved"
+          setalerttrigger={setalerttrigger}
+          vertical={'top'}
+          horizontal={'center'}
+          severity={'success'}
+        />
+      )}
+      {alerttrigger == "Reject Status" && (
+        <SimpleSnackbar
+          message="Rejected"
+          setalerttrigger={setalerttrigger}
+          vertical={'top'}
+          horizontal={'center'}
+          severity={'success'}
+        />
+      )}
+      {loading && <Loader value={'true'} />}
     </div>
   );
 };

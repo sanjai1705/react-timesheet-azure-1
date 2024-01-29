@@ -1,7 +1,7 @@
-import { Button, ButtonGroup, Divider, IconButton, Menu, Typography } from "@mui/material";
+import { Button, Divider, IconButton, Menu, Typography } from "@mui/material";
 import React, { useContext, useEffect, useState } from "react";
 import WeekPicker from "../WeekPicker";
-import { ArrowBackIosSharp, ArrowDropDown, ArrowForwardIosTwoTone, Close, Remove } from "@mui/icons-material";
+import { ArrowDropDown, Close } from "@mui/icons-material";
 import { CalendarIcon } from "@mui/x-date-pickers";
 import axios from "axios";
 import { AuthContext } from "../../App";
@@ -12,6 +12,7 @@ import PdfGeneration from "./PdfGeneration";
 import './PdfGeneration.css'
 import { useNavigate } from 'react-router-dom';
 import API_BASE_URL from '../../apiConfig';
+import NameMenuButton from "../../scenes/global/NameMenuButton";
 
 const TimesheetReports = () => {
     const { user } = useContext(AuthContext);
@@ -19,34 +20,17 @@ const TimesheetReports = () => {
   const colors = tokens(theme.palette.mode);
   const navigate = useNavigate()
   const [value, setValue] = useState(dayjs(new Date()));
-  const [fetchManEmpInfo, setfetchManEmpInfo] = useState(null);
-  const [fetchEmpTimeEntries, setfetchEmpTimeEntries] = useState([]);
-  const [fetchProjectEmpInfo, setfetchProjectEmpInfo] = useState([]);
-  const [fetchProjectTimeEntries, setfetchProjectTimeEntries] = useState(null)
+  const [fetchClientInfo, setfetchClientInfo] = useState(null);
+  const [fetchClientTimeEntries, setfetchClientTimeEntries] = useState(null)
   const [selectedstartDate, setselectedstartDate] = useState();
   const [selectedendDate, setselectedendDate] = useState();
-  const [selectedRows, setSelectedRows] = useState([]);
   const [selectedWeeks, setSelectedWeeks] = useState([]);
   const [selectedProject, setSelectedProject] = useState();
+  const [selectedName, setselectedName] = useState()
+  const [selectedClient, setselectedClient] = useState()
   const [projectNames, setProjectNames] = useState([]);
   const [userNames, setUserNames] = useState([]);
-  
-  const getManEmpInfo = async () => {
-    try {
-      const response = await axios.get(
-        `${API_BASE_URL}/EmployeeManager/Manager/${user.userId}`
-      );
-      console.log(response.data)
-      setfetchManEmpInfo(response.data);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  
-  useEffect(() => {
-    getManEmpInfo();
-  }, []);
+  const [timeEntries, settimeEntries] = useState([]);
 
   {/*useEffect(() => {
     const fetchData = async () => {
@@ -56,136 +40,139 @@ const TimesheetReports = () => {
   }, []);
 */}
 
-
+{/*
 useEffect(() => {
-  getProjectInfo();
-}, [fetchManEmpInfo]);
+  if (fetchProjectEmpInfo?.length > 0 && fetchManEmpInfo?.length > 0) {
+    // Initialize sets to store unique values
+    const uniqueProjectNames = new Set();
+    const uniqueUserNames = new Set();
+    //const uniqueDates = new Set();
 
-useEffect(() => {
-  // Initialize sets to store unique values
-  const uniqueProjectNames = new Set();
-  const uniqueUserNames = new Set();
-
-  fetchProjectEmpInfo?.forEach((row) => {
-    uniqueProjectNames.add(row.project.projectName);
-  });
-
-  fetchManEmpInfo?.forEach((row) => {
-      uniqueUserNames.add(row.user1.firstname + " " + row.user1.lastname);
-  })
-
-  // Convert sets to arrays and update state
-  setProjectNames(Array.from(uniqueProjectNames));
-  setUserNames(Array.from(uniqueUserNames));
-}, [fetchProjectEmpInfo]);
-
-
-
-  const getProjectInfo = async () => {
-    try {
-        const fetchData = fetchManEmpInfo?.map(async (item) => {
-            const response = await axios.get(
-              `${API_BASE_URL}/ProjectEmployee/user/${item.user1.userId}`
-            );
-            return response.data;
-          });
-
-          const responseData = await Promise.all(fetchData);
-          const combinedData = responseData.flat(); // Flatten the array
-          console.log(combinedData);
-          setfetchProjectEmpInfo(combinedData);
-    } catch(error) {
-        console.log(error)
-    }
-  }
-
-  const getPrevProjectTimeEntries = async (empId, startDate, endDate) => {
-    const queryString = `?projectEmployeeId=${empId}&userId=${user.userId}&startDate=${startDate}&endDate=${endDate}`
-    console.log(queryString)
-    try {
-      const response = await axios.get(`${API_BASE_URL}/customdate${queryString}`);
-      console.log(response)
-      const newArray = []
-      while (startDate <= endDate) {
-        const existingEntry = response.data?.find(entry => entry.date === startDate);
-        if (existingEntry) {
-          // Use the existing entry
-          newArray.push(existingEntry);
-        } else {
-          // Create a new entry
-          newArray.push({
-            projectEmployee: {
-              empID: empId,
-            },
-            user: {
-              userId: user.userId,
-            },
-            date: startDate,
-            minutes: "",
-            task: ""
-          });
-        }
-        let dateObject = new Date(startDate);
-        dateObject.setDate(dateObject.getDate() + 1);
-
-        // Use toLocaleDateString to get the updated date in "yyyy-mm-dd" format
-        let updatedDate = dateObject.toLocaleDateString('en-CA');
-        startDate = updatedDate
-        console.log(startDate)
+    // Iterate over fetchManEmpInfo to extract unique values
+    fetchManEmpInfo?.forEach((row) => {
+      //uniqueProjectNames.add(row.projectEmployee.project.projectName);
+      if (row.role.roleName === "Employee") {
+        uniqueUserNames.add(row.firstname + " " + row.lastname);
       }
-      setfetchProjectTimeEntries(newArray)
 
-    } catch (error) {
-      console.log("Error fetching User data:", error);
-    }
+      //uniqueDates.add(row.date);
+    });
+
+    fetchProjectEmpInfo?.forEach((row) => {
+      uniqueProjectNames.add(row.projectName);
+    });
+
+    // Convert sets to arrays and update state
+    setProjectNames(Array.from(uniqueProjectNames));
+    setUserNames(Array.from(uniqueUserNames));
+    // Convert set of dates to array, sort in ascending order, and update state
+    //setDates(Array.from(uniqueDates).sort((a, b) => new Date(a) - new Date(b)));
   }
+}, [fetchProjectEmpInfo, fetchManEmpInfo]);
+*/}
 
-  const getPrevProjectTimeEntries1 = async () => {
-    try {
-      const entries = await Promise.all(
-        selectedWeeks.map(async (week) => {
-          const weekEntries = await Promise.all(
-            fetchManEmpInfo.map(async (users) => {
-              const queryString = `?userId=${users.user1.userId}&startdate=${week.start}&enddate=${week.end}`;
-              const response = await axios.get(
-                `${API_BASE_URL}/EmployeeTimeentries/Customdate${queryString}`
-              );
-              return response.data; // Assuming the response data is what you want to save
-            })
-          );
-  
-          return weekEntries;
-        })
-      );
-        console.log(entries)
-      setfetchEmpTimeEntries(entries);
-    } catch (error) {
-      console.log("Error in getPrevProjectTimeEntries", error);
-    }
-  };
+
+useEffect(() => {
+  getClientInfo();
+}, []);
+
+useEffect(() => {
+  if(selectedClient) getTimeentriesClient()
+}, [selectedClient])
+
+const getClientInfo = async() => {
+  try {
+    const response = await axios.get(
+      `${API_BASE_URL}/ClientTable`
+    );
+    setfetchClientInfo(response.data);
+    //console.log(response.data);
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+const getTimeentriesClient = async() => {
+  settimeEntries([])
+  try {
+   const entries = await Promise.all(
+    selectedWeeks.map(async(week) => {
+      const queryString = `project-employee-timeentries?startDate=${week.start}&endDate=${week.end}`
+      const response = await axios.get(`${API_BASE_URL}/client/${selectedClient}/${queryString}`)
+      console.log(response.data)
+      const filteredAndSortedTimeEntries = response.data.employeeTimeentries
+          .filter(entry => entry.status === 'Approved')
+          .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+        // Return the modified object
+        return {
+          ...response.data,
+          employeeTimeentries: filteredAndSortedTimeEntries
+        };
+      })
+    );
+    console.log(entries)
+    
+    setfetchClientTimeEntries(entries)
+  } catch(error) {
+    console.log(error)
+  }
+}
+
+
+useEffect(()=> {
+  if(fetchClientTimeEntries != null) {
+    setProjectNames(fetchClientTimeEntries[0]?.projects)            //Since all the rows return the same projects and usernames
+    setUserNames(fetchClientTimeEntries[0]?.projectEmployees)
+    const filteredEntries = []
+    fetchClientTimeEntries?.forEach(item => {
+      filteredEntries.push(item.employeeTimeentries);
+  });
+  settimeEntries(filteredEntries)
+  }
+}, [fetchClientTimeEntries])
 
   useEffect(() => {
-    if(fetchEmpTimeEntries.length > 0) {
+    if(timeEntries?.length > 0) {
       filterTimeEntriesByProject()
     }
-  }, [fetchEmpTimeEntries, selectedProject])
+  }, [selectedProject])
 
+  useEffect(() => {
+    if(timeEntries?.length > 0) {
+      filterTimeEntriesByName()
+    }
+  }, [selectedName])
+  
   const filterTimeEntriesByProject = () => {
     if (selectedProject !== "") {
-      setfetchProjectTimeEntries(
-        fetchEmpTimeEntries.map((weekEntries) =>
-          weekEntries.map((emp) => 
-            emp.filter(
-              (entry) => ((entry.projectEmployee.project.projectName === selectedProject) && (entry.status == 'Approved'))
-            )
-          )
-        )
-      );
-    } else {
-      setfetchProjectTimeEntries(fetchEmpTimeEntries);
-    }
-  };
-  
+    const filteredEntries = []
+    fetchClientTimeEntries?.forEach(item => {
+      const isTimeEntryApproved = item.employeeTimeentries.filter((entry) => ((entry.projectEmployee.project.projectId == selectedProject) && (entry.status == 'Approved')));
+      filteredEntries.push(isTimeEntryApproved);
+    
+  });
+    settimeEntries(filteredEntries);
+
+    setUserNames(
+      fetchClientTimeEntries[0]?.projectEmployees.filter((item) => (item.project.projectId == selectedProject))
+      )
+  }
+};
+
+const filterTimeEntriesByName = () => {
+  if ((selectedProject !== "") && (selectedName !== "")) {
+    const filteredEntries = []
+    fetchClientTimeEntries?.forEach(item => {
+      const isTimeEntryApproved = item.employeeTimeentries.filter((entry) => ((entry.projectEmployee.project.projectId == selectedProject) && (entry.user.userId == selectedName) && (entry.status == 'Approved')));
+      filteredEntries.push(isTimeEntryApproved);
+    
+  });
+  settimeEntries(filteredEntries);
+}
+}
+
+
   const handleWeekPickerChange = async (newValue) => {
     setValue(newValue);
     const currentDate = new Date(newValue);
@@ -201,10 +188,6 @@ useEffect(() => {
     setselectedstartDate(() => startDateFormatted);
     setselectedendDate(() => endDateFormatted);
     handleSelectWeeks(startDateFormatted, endDateFormatted)
-    // Run getManEmpInfo only once
-    await getManEmpInfo();
-
-    console.log("End handleWeekPickerChange");
   }
 
   const [anchorEl, setAnchorEl] = useState(null);
@@ -220,13 +203,9 @@ useEffect(() => {
     setSelectedWeeks((prevSelectedWeeks) =>
       prevSelectedWeeks.filter((week, i) => i !== index)
     );
+    settimeEntries((prevTimeentries) =>  prevTimeentries.filter((week,i) => i !== index))
   };
 
-  console.log(selectedWeeks)
-  console.log(selectedProject)
-  console.log(fetchEmpTimeEntries)
-  console.log(fetchProjectTimeEntries)
-  
   const handleSelectWeeks = (start, end) => {
     const newWeek = { start, end };
 
@@ -248,25 +227,66 @@ useEffect(() => {
   };
 
   const handleGenerateReport = () => {
-    navigate('/generatereport', { state: {timeentries: fetchProjectTimeEntries, selectedWeeks: selectedWeeks, userNames: userNames} })
+    navigate('/generatereport', { state: {timeentries: timeEntries, selectedWeeks: selectedWeeks, userNames: userNames} })
   };
+  console.log(fetchClientTimeEntries)
+  console.log(timeEntries)
 
   return (
-    <div className="w-11/12 mx-auto space-y-5">
-      <Typography variant="h2">Timesheet Reports</Typography>
+    <div className="container px-10 flex flex-col mt-5 items-right gap-5 justify-center">
+      <div className="flex justify-between align-top">
+        <Typography variant="h2">Timesheet Reports</Typography>
+        <NameMenuButton />
+      </div>
       <div className="flex flex-col">
         <div className="flex flex-wrap gap-1">
           <div>
-            <Typography variant="h4">Select Project:</Typography>
+            <Typography variant="h4">Select Week</Typography>
+            <div className="flex items-center gap-2">
+              <Button
+                sx={{ backgroundColor: colors.blueAccent[600] }}
+                onClick={handleClick}
+              >
+                <CalendarIcon />
+                <ArrowDropDown />
+              </Button>
+              <Menu
+                id="basic-menu"
+                anchorEl={anchorEl}
+                open={open}
+                onClose={handleClose}
+              >
+                <WeekPicker onValueChange={handleWeekPickerChange} />
+              </Menu>
+              <ul className="flex flex-wrap gap-1">
+                {selectedWeeks.map((week, index) => (
+                  <li key={index} className="bg-red-100 rounded-md text-center">
+                    {`Week ${index + 1}: ${week.start} to ${week.end}`}
+                    <IconButton
+                      color="error"
+                      onClick={() => handleRemoveWeek(index)}
+                    >
+                      <Close />
+                    </IconButton>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex gap-2 items-end">
+          <div>
+            <Typography variant="h4">Select Client:</Typography>
             <select
               className="p-2 bg-slate-200 border border-transparent rounded-md focus:outline-none focus:border-gray-900 focus:bg-white"
-              value={selectedProject}
-              onChange={(e) => setSelectedProject(e.target.value)}
+              value={selectedClient}
+              onChange={(e) => setselectedClient(e.target.value)}
             >
-              <option value="">Filter by Project</option>
-              {projectNames.map((name, index) => (
-                <option key={index} value={name}>
-                  {name}
+              <option value="">Filter by Client</option>
+              {fetchClientInfo?.map((name) => (
+                <option key={name.clientId} value={name.clientId}>
+                  {name.clientName}
                 </option>
               ))}
             </select>
@@ -275,133 +295,103 @@ useEffect(() => {
           <div>
             <Typography variant="h4">Select Project:</Typography>
             <select
+              disabled={!selectedClient}
               className="p-2 bg-slate-200 border border-transparent rounded-md focus:outline-none focus:border-gray-900 focus:bg-white"
               value={selectedProject}
               onChange={(e) => setSelectedProject(e.target.value)}
             >
               <option value="">Filter by Project</option>
-              {projectNames.map((name, index) => (
-                <option key={index} value={name}>
-                  {name}
+              {projectNames?.map((name, index) => (
+                <option key={index} value={name.projectId}>
+                  {name.projectName}
                 </option>
               ))}
             </select>
           </div>
-        </div>
 
-        <div>
-          <Typography variant="h4">Select Week</Typography>
-          <div className="flex items-center gap-2">
-            <Button
-              sx={{ backgroundColor: colors.blueAccent[600] }}
-              onClick={handleClick}
+          <div>
+            <Typography variant="h4">Select User:</Typography>
+            <select
+              disabled={!selectedProject}
+              className="p-2 bg-slate-200 border border-transparent rounded-md focus:outline-none focus:border-gray-900 focus:bg-white"
+              value={selectedName}
+              onChange={(e) => setselectedName(e.target.value)}
             >
-              <CalendarIcon />
-              <ArrowDropDown />
-            </Button>
-            <Menu
-              id="basic-menu"
-              anchorEl={anchorEl}
-              open={open}
-              onClose={handleClose}
-            >
-              <WeekPicker onValueChange={handleWeekPickerChange} />
-            </Menu>
-            <ul className="flex flex-wrap gap-1">
-              {selectedWeeks.map((week, index) => (
-                <li key={index} className="bg-red-100 rounded-md text-center">
-                  {`Week ${index + 1}: ${week.start} to ${week.end}`}
-                  <IconButton
-                    color="error"
-                    onClick={() => handleRemoveWeek(index)}
-                  >
-                    <Close />
-                  </IconButton>
-                </li>
+              <option value="">Filter by Name</option>
+              {userNames?.map((item, index) => (
+                <option key={index} value={item.user.userId}>
+                  {item.user.firstname + " " + item.user.lastname}
+                </option>
               ))}
-            </ul>
+            </select>
           </div>
-        </div>
 
-        <div>
-          <Button
+          <div>
+          <button
+            className="p-2 bg-slate-700 text-white rounded-md hover:bg-slate-900"
             onClick={handleGenerateReport}
-            variant="contained"
-            color="primary"
           >
             Generate Report
-          </Button>
-          <Button onClick={getPrevProjectTimeEntries1}>fetch</Button>
+          </button>
         </div>
+        </div>
+       
       </div>
 
       <div>
         <div className="w-11/12 mx-auto mb-16">
-          {fetchProjectTimeEntries?.map((week, weekIndex) => (
+          {selectedWeeks?.map((week, weekIndex) => (
+            <>
+            <Typography variant="h3" sx={{ textDecoration: "underline" }}>
+              {new Date(selectedWeeks[weekIndex].start).toDateString() +
+                " - " +
+                new Date(selectedWeeks[weekIndex].end).toDateString()}
+            </Typography>
+
             <div className="mb-8">
-              <Typography variant="h3" sx={{ textDecoration: "underline" }}>
-                {new Date(selectedWeeks[weekIndex].start).toDateString() +
-                  " - " +
-                  new Date(selectedWeeks[weekIndex].end).toDateString()}
-              </Typography>
-              {week.map((user, userIndex) => (
-                <div className="mt-4 mb-10">
-                  <Typography variant="h4">{userNames[userIndex]}</Typography>
-                  {user.length != 0 ? (
-                    <table className="w-11/12 mx-auto border border-gray-300 text-center">
-                      <thead>
-                        <tr className="bg-slate-500">
-                          <th className="border border-gray-300">UserId</th>
-                          <th className="border border-gray-300">Date</th>
-                          <th className="border border-gray-300"> Project Name</th>
-                          <th className="border border-gray-300">Login Time</th>
-                          <th className="border border-gray-300">Logout Time</th>
-                          <th className="border border-gray-300">Hours</th>
-                          <th className="border border-gray-300">Status</th>
-                        </tr>
-                      </thead>
+              <div className="mt-4 mb-10">
+                <table className="w-11/12 mx-auto border border-gray-300 text-center">
+                  <thead>
+                    <tr className="bg-slate-500">
+                      <th className="border border-gray-300">Name</th>
+                      <th className="border border-gray-300">Date</th>
+                      <th className="border border-gray-300">Project Name</th>
+                      <th className="border border-gray-300">Hours</th>
+                      <th className="border border-gray-300">Status</th>
+                    </tr>
+                  </thead>
 
-                      <tbody>
-                        {user.map((item) => (
-                          <tr>
-                            <td className="border border-gray-300">
-                              {item.user.userId}
-                            </td>
-                            <td className="border border-gray-300">
-                              {item.date}
-                            </td>
-                            <td className="border border-gray-300">
-                              {item.projectEmployee.project.projectName}
-                            </td>
-                            <td className="border border-gray-300">
-                              {item.login}
-                            </td> <td className="border border-gray-300">
-                              {item.logout}
-                            </td>
-                            <td className="border border-gray-300">
-                              {item.minutes / 60}
-                            </td>
-                            <td className="border border-gray-300">
-                              {item.status}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
+                  <tbody>
+                    {timeEntries[weekIndex]?.map((item, index) => (
+                      <tr>
+                        <td className="border border-gray-300">
+                          {item.user.firstname+ ' '+item.user.lastname}
+                        </td>
+                        <td className="border border-gray-300">{item.date}</td>
+                        <td className="border border-gray-300">
+                          {item.projectEmployee.project.projectName}
+                        </td>
+                        <td className="border border-gray-300">
+                          {item.minutes / 60}
+                        </td>
+                        <td className="border border-gray-300">{item.status}</td>
+                      </tr>
+                    ))}
+                  </tbody>
 
-                      <tfoot>
-                      <tr className="bg-slate-300">
-                        <td colSpan="5" className="p-2 border text-right">Total working hours:</td>
-                        <td colSpan="2" className="p-2 border text-left">{user.reduce((acc, obj) => acc + obj.minutes/60, 0)}</td>
-                        </tr>
-                      </tfoot>
-                    </table>
-                  ) : (
-                    <Typography variant="h5">-- No records --</Typography>
-                  )}
-                </div>
-              ))}
+                  <tfoot>
+                    <tr className="bg-slate-300">
+                      <td colSpan="3" className="p-2 border text-right">
+                        Total working hours:
+                      </td>
+                      <td colSpan="2" className="p-2 border text-left">{timeEntries[weekIndex]?.reduce((acc, obj) => acc + obj.minutes/60, 0)}</td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
               <Divider />
             </div>
+          </>
           ))}
         </div>
       </div>

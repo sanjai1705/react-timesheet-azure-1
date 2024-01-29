@@ -33,7 +33,7 @@ const NameMenuButton = () => {
         open={open}
         onClose={handleClose}
       >
-        <MenuItem>
+        <MenuItem onClick={()=>navigate('/u/profile')}>
           <PersonOutlined /> Profile
         </MenuItem>
         <MenuItem onClick={() => handleLogout()}>

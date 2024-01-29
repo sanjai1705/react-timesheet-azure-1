@@ -1,129 +1,123 @@
-import React, { useContext, useState } from "react";
+import React, { useContext } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { mockDataTeam } from "../data/mockData";
+import { useFormik } from "formik";
+import * as Yup from "yup";
 import { AuthContext } from "../App";
-import loginbg from "../../src/login-bg.jpg";
 import API_BASE_URL from "../apiConfig";
+import ZAdroitLogo from "../zadroit logo.png";
 
 function LoginForm() {
-  const { user, login } = useContext(AuthContext);
-  const [loggedIn, setLoggedIn] = useState(false);
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
+  const { login } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  const handleUsernameChange = (event) => {
-    setUsername(event.target.value);
-  };
+  const validationSchema = Yup.object({
+    username: Yup.string()
+      .min(4, "Username must be at least 4 characters long") // Updated line
+      .required("Username is required"),
+    password: Yup.string()
+      .required("Password is required"),
+  });
+  
 
-  const handlePasswordChange = (event) => {
-    setPassword(event.target.value);
-  };
+  const formik = useFormik({
+    initialValues: {
+      username: "",
+      password: "",
+    },
+    validationSchema: validationSchema,
+    onSubmit: async (values) => {
+      try {
+        const response = await axios.post(`${API_BASE_URL}/login`, values);
+        const data = response.data;
+        login({
+          role: data.Rolename,
+          userId: data.userid,
+          username: values.username,
+        });
 
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
-
-  const handlelogin = () => {
-    const user = mockDataTeam.find(
-      (u) => u.username === username && u.password === password
-    );
-    login({ role: user.role, userId: user.userid, username: username });
-
-    if (user.role == "Employee") {
-      navigate("/e");
-    } else if (user.role == "Manager") {
-      navigate("/m");
-    } else {
-      console.log("Invalid credentials");
-      setErrorMessage("Invalid Credentials");
-    }
-  };
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    try {
-      const response = await axios.post(
-        `${API_BASE_URL}/login`,
-        {
-          username,
-          password,
+        if (["Employee", "Manager", "Admin"].includes(data.Rolename)) {
+          navigate("/u/timeentries");
+        } else {
+          formik.setFieldError("general", "Invalid Credentials");
         }
-      );
-      const data = response.data;
-      console.log(data);
-      login({ role: data.Rolename, userId: data.userid, username: username });
-      if (
-        data.Rolename == "Employee" ||
-        data.Rolename == "Manager" ||
-        data.Rolename == "Admin"
-      ) {
-        navigate("/u/dashboard");
-      } else {
-        console.log("Invalid credentials");
-        setErrorMessage("Invalid Credentials");
+      } catch (error) {
+        console.error("Error:", error);
+        formik.setFieldError("general", "Login Failed");
       }
-    } catch (error) {
-      console.error("Error:", error);
-      setErrorMessage("Login Failed");
-    }
-  };
-
-  console.log(user);
+    },
+  });
 
   return (
     <>
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <div className="min-h-screen flex items-center justify-center loginpage-bg bg-cover bg-center">
         <div className="max-w-md w-full p-6 bg-white rounded-lg shadow-md">
-          <h1 className="text-2xl font-semibold mb-4 text-black">
-            Timesheet Log In
-          </h1>
+          <div className="flex flex-col items-center">
+            <img src={ZAdroitLogo} className="h-16" alt="ZAdroit Logo" />
+            <h1 className="text-2xl font-thin mb-4 text-black md:text-4xl">
+              Timesheet
+            </h1>
+          </div>
+
           <form
             className="bg-white p-6 rounded-lg shadow-md space-y-4"
-            onSubmit={handleSubmit}
+            onSubmit={formik.handleSubmit}
           >
             <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Username:
-              </label>
               <input
                 type="text"
-                className="px-1 py-2 mt-1 text-lg block w-full rounded-sm bg-slate-50 border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200"
-                value={username}
-                onChange={handleUsernameChange}
+                name="username"
+                onChange={formik.handleChange}
+                value={formik.values.username}
+                onBlur={formik.handleBlur}
+                className="px-1 py-2 mt-1 text-md block w-full rounded-sm bg-slate-50 border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200"
+                placeholder="Username"
                 required
               />
+              {formik.touched.username && formik.errors.username ? (
+                <p className="text-red-500">{formik.errors.username}</p>
+              ) : null}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Password:
-              </label>
               <input
-                type={showPassword ? "text" : "password"}
-                value={password}
-                className="px-1 py-2 mt-1 text-lg block w-full rounded-sm bg-slate-50 border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200"
-                onChange={handlePasswordChange}
+                type={formik.values.showPassword ? "text" : "password"}
+                name="password"
+                onChange={formik.handleChange}
+                value={formik.values.password}
+                onBlur={formik.handleBlur}
+                className="px-1 py-2 mt-1 text-md block w-full rounded-sm bg-slate-50 border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200"
+                placeholder="Password"
                 required
               />
+              {formik.touched.password && formik.errors.password ? (
+                <p className="text-red-500">{formik.errors.password}</p>
+              ) : null}
             </div>
             <div>
               <input
                 type="checkbox"
                 className="mr-2"
-                checked={showPassword}
-                onChange={togglePasswordVisibility}
-              ></input>
+                checked={formik.values.showPassword}
+                onChange={() =>
+                  formik.setFieldValue(
+                    "showPassword",
+                    !formik.values.showPassword
+                  )
+                }
+              />
               Show Password
             </div>
             <div>
-              <text 
-                className="text-red-500 cursor-pointer hover:underline"
-                onClick={()=>navigate("/forgotpass")}>Forgot Password?</text>
+              <p
+                className="text-black cursor-pointer hover:underline"
+                onClick={() => navigate("/forgotpass")}
+              >
+                Forgot Password?
+              </p>
             </div>
-            {errorMessage && <p className="text-red-500">{errorMessage}</p>}
+            {formik.errors.general && (
+              <p className="text-red-500">{formik.errors.general}</p>
+            )}
             <button
               type="submit"
               className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-300"
@@ -133,47 +127,6 @@ function LoginForm() {
           </form>
         </div>
       </div>
-
-      {/*<div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-300 to-slate-600">
-      <div className="bg-white w-full h-full mx-8 p-8 rounded-lg flex items-center justify-between">
-      <div className='w-1/2'>
-          <img src={loginbg} alt="Login Image" className='w-52'/>
-        </div>
-
-        //Right side (login inputs)
-        <div className='w-1/2'>
-          //Your login inputs go here
-          <label htmlFor="username">Username:</label>
-          <input type="text" id="username" className="border border-gray-300 p-2 rounded-md mb-4 block" />
-
-          <label htmlFor="password">Password:</label>
-          <input type="password" id="password" className="border border-gray-300 p-2 rounded-md mb-4 block" />
-
-         //Add your login button or other elements here
-        </div>
-      </div>
-    </div>
-
-
-    <div className="min-h-screen flex items-center justify-center bg-slate-500">
-    <div className="inset-0 bg-white bg-opacity-30">
-    <div className='w-1/2'>
-          <img src={loginbg} alt="Login Image" className='w-52'/>
-        </div>
-
-        //Right side (login inputs)
-        <div className='w-1/2'>
-          //Your login inputs go here
-          <label htmlFor="username">Username:</label>
-          <input type="text" id="username" className="border border-gray-300 p-2 rounded-md mb-4 block" />
-
-          <label htmlFor="password">Password:</label>
-          <input type="password" id="password" className="border border-gray-300 p-2 rounded-md mb-4 block" />
-
-          //Add your login button or other elements here
-        </div>
-    </div>
-    </div>*/}
     </>
   );
 }

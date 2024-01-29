@@ -6,12 +6,14 @@ import styled from '@emotion/styled';
 import { AuthContext } from '../../App';
 import NameMenuButton from '../global/NameMenuButton';
 import API_BASE_URL from '../../apiConfig';
+import Loader from '../../components/Loader';
 
 const Dashboard = () => {
   const { user, login } = useContext(AuthContext);
   const userId = user.userId;
   console.log(userId)
   const [fetchUserInfo, setfetchUserInfo] = useState([])
+  const [loading, setLoading] = useState(true);
 
   const StyledTableRow = styled(TableRow)(({ theme }) => ({
     '&:nth-of-type(odd)': {
@@ -25,6 +27,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     const getData = async () => {
+      setLoading(true)
       try {
         const response = await axios.get(`${API_BASE_URL}/Users/${userId}`);
         console.log(response)
@@ -32,6 +35,7 @@ const Dashboard = () => {
     } catch (error) {
         console.log("Error fetching data:", error);
       }
+      setLoading(false)
     }
     getData();
   }, [userId]);
@@ -58,7 +62,7 @@ const Dashboard = () => {
               <StyledTableRow>
                 <TableCell>Full Name:</TableCell>
                 <TableCell>
-                  {fetchUserInfo.firstname + " " + fetchUserInfo.lastname}
+                  {fetchUserInfo.length > 0 && fetchUserInfo.firstname + " " + fetchUserInfo.lastname}
                 </TableCell>
               </StyledTableRow>
               <StyledTableRow>
@@ -85,6 +89,7 @@ const Dashboard = () => {
           </Table>
         </TableContainer>
       </div>
+      {loading && <Loader value={'true'} />}
     </div>
   );
 }

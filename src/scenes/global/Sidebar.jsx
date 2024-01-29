@@ -9,7 +9,7 @@ import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import CalendarTodayOutlinedIcon from "@mui/icons-material/CalendarTodayOutlined";
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
-import { ApprovalOutlined, ArticleOutlined, ManageAccounts, ViewAgendaOutlined } from "@mui/icons-material";
+import { ApprovalOutlined, ArticleOutlined, ManageAccounts, TodayOutlined, ViewAgendaOutlined } from "@mui/icons-material";
 import { AuthContext } from "../../App";
 
 
@@ -35,8 +35,8 @@ const Item = ({ title, to, icon, selected, setSelected }) => {
 const Sidebar = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  const [selected, setSelected] = useState("Dashboard");
+  const [isCollapsed, setIsCollapsed] = useState(true);
+  const [selected, setSelected] = useState("Profile");
   const {user} = useContext(AuthContext)
 
   return (
@@ -88,19 +88,20 @@ const Sidebar = () => {
           </MenuItem>
           <Box paddingLeft={isCollapsed ? undefined : "10%"}>
             <Item
-              title="Dashboard"
-              to={'/u/dashboard'}
-              icon={<HomeOutlinedIcon />}
+              title="Profile"
+              to={'/u/profile'}
+              icon={<PersonOutlinedIcon/>}
               selected={selected}
               setSelected={setSelected}
             />
             <Item
               title="TimeSheet"
               to={'/u/timeentries'}
-              icon={<PersonOutlinedIcon />}
+              icon={<TodayOutlined/>}
               selected={selected}
               setSelected={setSelected}
             />
+            {/*
             <Item
               title="View TimeSheet"
               to={'/u/viewtimesheet'}
@@ -114,20 +115,20 @@ const Sidebar = () => {
               icon={<CalendarTodayOutlinedIcon />}
               selected={selected}
               setSelected={setSelected}
-            />
-            {user.role=='Manager' &&
-             <Item
-              title="Timesheet Reports"
-              to={'/u/timesheetreports'}
-              icon={<ArticleOutlined/>}
-              selected={selected}
-              setSelected={setSelected}
-            />}
+            />*/}
             {user.role=='Manager' &&
              <Item
               title="Approvals"
               to={'/u/approvals'}
               icon={<ApprovalOutlined/>}
+              selected={selected}
+              setSelected={setSelected}
+            />}
+            {user.role=='Manager' &&
+             <Item
+              title="Timesheet Reports"
+              to={'/u/timesheetreports'}
+              icon={<ArticleOutlined/>}
               selected={selected}
               setSelected={setSelected}
             />}

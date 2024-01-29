@@ -25,7 +25,7 @@ body,
 }
 
 ::-webkit-scrollbar {
-  width: 0px;  /* set width to 10px if you need scrollbar*/
+  width: 10px;  /* set width to 10px if you need scrollbar*/
 }
 
 /* Track */
@@ -41,4 +41,21 @@ body,
 /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
   background: #555;
+}
+
+.loginpage-bg {
+  position: relative;
+}
+
+.loginpage-bg::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background-image: url('/src/bgsss.jpg');
+  background-size: cover;
+  background-position: center;
+  z-index: -1;
 }

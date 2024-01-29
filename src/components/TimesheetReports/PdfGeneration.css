@@ -1,0 +1,6 @@
+@media print {
+    .page-content {
+      border: 2px solid #000; /* Add your desired border styles */
+      page-break-after: always; /* Ensure each page has a break after it */
+    }
+  }

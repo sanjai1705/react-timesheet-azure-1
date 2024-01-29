@@ -7,7 +7,7 @@ import { useEffect } from 'react';
 import { useState } from 'react';
 import { Alert, Slide } from '@mui/material';
 
-export default function SimpleSnackbar({message, setalerttrigger}) {
+export default function SimpleSnackbar({message, setalerttrigger, vertical, horizontal, severity}) {
   const [open, setOpen] = useState(false);
 
   useEffect(()=> {
@@ -44,12 +44,13 @@ export default function SimpleSnackbar({message, setalerttrigger}) {
   return (
     <div>
       <Snackbar
+        anchorOrigin={{ vertical, horizontal }}
         sx={{width: '30%'}}
         open={open}
         autoHideDuration={6000}
         action={action}
       >
-        <Alert onClose={handleClose} severity="error" sx={{ width: '100%', fontSize: '1rem' }}>
+        <Alert onClose={handleClose} severity={severity ? severity : 'error'} sx={{ width: '100%', fontSize: '1rem' }}>
           {message}
         </Alert>
       </Snackbar>
