@@ -42,25 +42,25 @@ jobs:
           name: node-app
           path: release.zip
   deploy:
-    needs: build
     runs-on: ubuntu-latest
+    needs: build
+    environment:
+      name: 'Production'
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
 
     steps:
-      - name: Download artifact
+      - name: Download artifact from build job
         uses: actions/download-artifact@v3
         with:
           name: node-app
-          path: ./deploy
 
-      - name: Install lftp
-        run: sudo apt-get install -y lftp
-
-      - name: FTP deployment to cPanel
-        run: |
-          lftp -c "open -u ${{ secrets.CPANEL_FTP_USERNAME }},${{ secrets.CPANEL_FTP_PASSWORD }} ${{ secrets.CPANEL_HOST }}; set ssl:verify-certificate no; mirror -R ./deploy /public_html"
-        env:
-          CPANEL_FTP_USERNAME: ${{ startza_db_user}}
-          CPANEL_FTP_PASSWORD: ${{ Start@12345# }}
-          CPANEL_HOST: ${{ 162.222.225.160 }}
+      - name: 'Deploy to Azure Web App'
+        uses: azure/webapps-deploy@v2
+        id: deploy-to-webapp
+        with:
+          app-name: 'timesheet-react'
+          slot-name: 'Production'
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_3841364BC8C84C1DB56437CA2A4D16D9 }}
+          package: release.zip
 
   
