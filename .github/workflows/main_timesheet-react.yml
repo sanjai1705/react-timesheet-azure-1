@@ -56,5 +56,11 @@ jobs:
         run: sudo apt-get install -y lftp
 
       - name: Deploy to cPanel
-        run: |
-          lftp -e "open -u startza,Start@12345# ftp.startza.in; mirror -R ./build /public_html; quit"
+        uses: appleboy/scp-action@v0.1.7
+        with:
+           host: ${{ secrets.CPANEL_ftp.startza.in }}
+           username: ${{ secrets.CPANEL_startza }}
+           password: ${{ secrets.CPANEL_Start@12345# }}
+           local: 'dist/'  # Change to your build output directory
+           remote: '/public_html/'  # Change to your cPanel public directory
+           rm: true
