@@ -58,8 +58,11 @@ jobs:
       - name: 'Deploy to cPanel via FTP'
         uses: SamKirkland/FTP-Deploy-Action@4.1.0
         with:
-          server: ${{ secrets.CPANEL_ftp.startza.in }}
-          username: ${{ secrets.CPANEL_anonymous@startza.in }}
+          server: 'ftp.startza.in'
+          username: 'timesheetreact'
+          password: 'Start@12345#'
+          port: 21
+          protocol: 'ftp'
           local-dir: ./build
-          remote-dir: public_html
+          remote-dir: startza.in/timesheetreact
           exclude: .git,.gitignore
