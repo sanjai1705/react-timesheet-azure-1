@@ -52,15 +52,13 @@ jobs:
           name: node-app
           path: release.zip
 
-      - name: Install lftp
-        run: sudo apt-get install -y lftp
+      - name: Deploy using lftp
+        run: |
+          HOST="yftp.startza.in" # Change this to your cPanel domain
+          USER="timesheetreact@startza.in"        # Change this to your cPanel username
+          PASS="Start@12345#"        # Change this to your cPanel password
+          REMOTE_PATH="/home3/startza/public_html/timesheetreact"     # Change this to the path where you want to deploy
 
-      - name: 'Deploy to cPanel via FTP'
-        uses: SamKirkland/FTP-Deploy-Action@4.1.0
-        with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: ./home3/startza/repositories/react-timesheet-azure-1/
-          server-dir: /home3/startza/public_html/timesheetreact/  # Adjust the server directory as needed
-          protocol: ftp
+          lftp -d -c "open -u $USER,$PASS $HOST; mirror -e -R -v -x .git -x .github -x .gitignore -x deploy.yml -x README.md -x .gitattributes $GITHUB_WORKSPACE/ $REMOTE_PATH/" || exit 1
+
+     
