@@ -46,7 +46,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Download Artifact
+      - name: Download Build Artifact
         uses: actions/download-artifact@v2
         with:
           name: build-artifact
@@ -58,4 +58,3 @@ jobs:
       - name: Deploy to cPanel
         run: |
           lftp -c "open -u startza,Start@12345# ftp.startza.in; set ssl:verify-certificate no; mirror -R ./build /public_html"
-  
