@@ -55,12 +55,11 @@ jobs:
       - name: Install lftp
         run: sudo apt-get install -y lftp
 
-      - name: Deploy to cPanel
-        uses: appleboy/scp-action@v0.1.7
+      - name: 'Deploy to cPanel via FTP'
+        uses: SamKirkland/FTP-Deploy-Action@4.1.0
         with:
-           host: ${{ secrets.CPANEL_ftp.startza.in }}
-           username: ${{ secrets.CPANEL_startza }}
-           password: ${{ secrets.CPANEL_Start@12345# }}
-           local: 'dist/'  # Change to your build output directory
-           remote: '/public_html/'  # Change to your cPanel public directory
-           rm: true
+          server: ${{ secrets.CPANEL_ftp.startza.in }}
+          username: ${{ secrets.CPANEL_anonymous@startza.in }}
+          local-dir: ./build
+          remote-dir: public_html
+          exclude: .git,.gitignore
