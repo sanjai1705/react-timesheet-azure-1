@@ -61,6 +61,6 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: ./home3
-          server-dir: /public_html  # Adjust the server directory as needed
+          local-dir: ./home3/startza/repositories/react-timesheet-azure-1/
+          server-dir: /home3/startza/public_html/timesheetreact  # Adjust the server directory as needed
           protocol: ftp
