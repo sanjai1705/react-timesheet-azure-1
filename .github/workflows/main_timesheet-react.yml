@@ -52,6 +52,10 @@ jobs:
           name: node-app
           path: release.zip
 
+      - name: Set up lftp
+        run: |
+          sudo apt-get install lftp
+
       - name: Deploy using lftp
         run: |
           HOST="yftp.startza.in" # Change this to your cPanel domain
