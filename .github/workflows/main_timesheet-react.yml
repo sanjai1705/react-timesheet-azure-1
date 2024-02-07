@@ -63,6 +63,6 @@ jobs:
           password: 'Start@12345#'
           port: 21
           protocol: 'ftp'
-          local-dir: /home3/startza/startza.in/timesheetreact
-          remote-dir: /public_html 
+          local-dir: '/home3/startza/startza.in/timesheetreact/**/*'
+          remote-dir: '/public_html'
           exclude: .git,.gitignore
