@@ -57,4 +57,4 @@ jobs:
 
       - name: Deploy to cPanel
         run: |
-          lftp -c "open -u startza,Start@12345# ftp.startza.in; set ssl:verify-certificate no; mirror -R ./build /public_html"
+          lftp -e "open -u startza,Start@12345# ftp.startza.in; mirror -R ./build /public_html; quit"
