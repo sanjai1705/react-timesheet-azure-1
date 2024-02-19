@@ -42,23 +42,33 @@ jobs:
           name: node-app
           path: release.zip
   deploy:
-    needs: build
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        node-version: [14.x, 16.x, 18.x]
+
     steps:
-      - name: Download Build Artifact
-        uses: actions/download-artifact@v2
+      - name: Checkout Code 🚚
+        uses: actions/checkout@v3
+
+      - name: Install Dependencies 📦
+        run: npm install
+
+      - name: Build React App / Vue App (depending on user app) 🏗️
+        run: npm run build
+
+      - name: Upload to cPanel 📂
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
-          name: node-app
-          path: release.zip
-
-      - name: Set up lftp
-        run: |
-          sudo apt-get install lftp
-
-      - name: Deploy using lftp
-        run: |
-         lftp -e "open -u ${{ secrets.FTP_USERNAME }},${{ secrets.FTP_PASSWORD }} ${{ secrets.FTP_SERVER }}; mirror -R /home3/startza/public_html/timesheetreact /remote/path" -p 21
-
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: /public_html/
+          exclude: |
+            **/.git**
+            **/.git*/**
+            **/node_modules/**
+            **/.**
 
      
