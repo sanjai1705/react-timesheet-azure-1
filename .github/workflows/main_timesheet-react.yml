@@ -31,7 +31,7 @@ jobs:
       with:
          server: ftp.startza.in
          username: timesheetreact@startza.in
-         password: Start@12345#
+         password: Start@12345# cBZ8D&l[OEIQ
          local-dir: ./build/
          server-dir: /home3/startza/public_html/timesheetreact  # Update this line
          protocol: ftp
