@@ -31,7 +31,7 @@ jobs:
       uses: SamKirkland/FTP-Deploy-Action@v4.3.4
       with:
         server: ftp.startza.in
-        username: timesheetreact@startza.in
+        username: tftp@startza.in
         password: Start@12345#
         protocol: ftp
         local-dir: ./build/
