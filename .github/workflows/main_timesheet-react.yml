@@ -26,16 +26,14 @@ jobs:
       run: npm run build
       env:
           CI: false  # Set CI to false during the build step
+
     - name: 📂 Sync files
       uses: SamKirkland/FTP-Deploy-Action@v4.3.4
       with:
-         server: ftp.startza.in
-         username: timesheetreact@startza.in
-         password: Start@12345#
-         local-dir: ./build/
-         server-dir: /home3/startza/public_html/timesheetreact/  # Update this line
-         protocol: ftp
-         port: 21
-         protocol-mode: "explicit"
-
+        server: ftp.startza.in
+        username: timesheetreact@startza.in
+        password: Start@12345#
+        protocol: ftp
+        local-dir: ./build/
+    
         
