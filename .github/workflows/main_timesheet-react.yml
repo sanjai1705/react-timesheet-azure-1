@@ -29,11 +29,12 @@ jobs:
     - name: 📂 Sync files
       uses: SamKirkland/FTP-Deploy-Action@v4.3.4
       with:
-        server: ${{ secrets.FTP_SERVER }}
-        username: ${{ secrets.FTP_Username }}
-        password: ${{ secrets.FTP_Password }}
-        protocol: ftps
-        port: 21
-        local-dir: ./build/
-        remote-dir: /timesheetreact
+         server: ftp.startza.in
+         username: timesheetreact@startza.in
+         password: ${{ secrets.ftp_password }}
+         local-dir: ./build/
+         remote-dir: /home3/startza/public_html/timesheetreact  # Update this line
+         protocol: ftps
+         port: 21
+
         
