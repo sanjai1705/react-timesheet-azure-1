@@ -32,4 +32,6 @@ jobs:
         server: ${{ secrets.FTP_SERVER }}
         username: ${{ secrets.FTP_Username }}
         password: ${{ secrets.FTP_Password }}
+        protocol: ftps
+        port: 21
         local-dir: ./build/
