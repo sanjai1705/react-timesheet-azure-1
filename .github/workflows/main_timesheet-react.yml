@@ -34,7 +34,7 @@ jobs:
          password: ${{ secrets.ftp_password }}
          local-dir: ./build/
          remote-dir: /home3/startza/public_html/timesheetreact  # Update this line
-         protocol: ftps
+         protocol: ftp
          port: 21
 
         
