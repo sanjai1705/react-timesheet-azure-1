@@ -36,5 +36,6 @@ jobs:
          server-dir: /home3/startza/public_html/timesheetreact/  # Update this line
          protocol: ftp
          port: 21
+         protocol-mode: "explicit"
 
         
